@@ -21,6 +21,7 @@ import client from '../../../api';
 import useLatest from '../../../utils/useLatest';
 import OpenCodeEditorButton from '../../../components/OpenCodeEditor';
 
+const DEFAULT_ICON = 'DashboardCustomizeSharp';
 const DEFAULT_NAME = 'MyComponent';
 
 export interface CreateCodeComponentDialogProps {
@@ -40,12 +41,14 @@ export default function CreateCodeComponentDialog({
     [dom],
   );
 
+  const [icon, setIcon] = React.useState(DEFAULT_ICON);
   const [name, setName] = React.useState(appDom.proposeName(DEFAULT_NAME, existingNames));
 
   // Reset form
-  const handleReset = useEventCallback(() =>
-    setName(appDom.proposeName(DEFAULT_NAME, existingNames)),
-  );
+  const handleReset = useEventCallback(() =>{
+    setIcon(DEFAULT_ICON);
+    setName(appDom.proposeName(DEFAULT_NAME, existingNames));
+  });
 
   React.useEffect(() => {
     if (open) {
@@ -75,7 +78,7 @@ export default function CreateCodeComponentDialog({
           onSubmit={async (event) => {
             event.preventDefault();
             invariant(isFormValid, 'Invalid form should not be submitted when submit is disabled');
-            await client.mutation.createComponent(name);
+            await client.mutation.createComponent(name, icon);
             onClose();
             setSnackbarState({ name });
           }}
@@ -91,6 +94,15 @@ export default function CreateCodeComponentDialog({
               label="name"
               value={name}
               onChange={(event) => setName(event.target.value)}
+              error={open && !isNameValid}
+              helperText={inputErrorMsg}
+            />
+            <TextField
+              sx={{ my: 1 }}
+              fullWidth
+              label="icon"
+              value={icon}
+              onChange={(event) => setIcon(event.target.value)}
               error={open && !isNameValid}
               helperText={inputErrorMsg}
             />

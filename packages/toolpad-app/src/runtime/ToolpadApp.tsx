@@ -174,6 +174,7 @@ const AppRoot = styled('div')({
   position: 'relative' /* Makes sure that the editor overlay that renders inside sizes correctly */,
   minHeight: '100vh',
   display: 'flex',
+  ...(isRenderedInCanvas ? {padding: '10px'} : {} ),
   flexDirection: 'column',
 });
 
@@ -1185,18 +1186,16 @@ interface PageRootProps {
 
 function PageRoot({ children }: PageRootProps) {
   return (
-    <Container>
       <Stack
         data-testid="page-root"
         direction="column"
         sx={{
-          my: 2,
+          flex:1,
           gap: 1,
         }}
       >
         {children}
       </Stack>
-    </Container>
   );
 }
 

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: page
+spec:
+  id: I5126qw
+  title: Default page2
+  content:
+    - component: Container
+      name: container
+    - component: codeComponent.MyComponent
+      name: codeComponent_MyComponent
+    - component: codeComponent.MyComponent1
+      name: codeComponent_MyComponent1
+  display: standalone
