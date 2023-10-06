@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: page
-spec:
-  id: -CZnayM
-  title: page1
-  display: shell
