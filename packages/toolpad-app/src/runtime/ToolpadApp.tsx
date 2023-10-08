@@ -3,7 +3,6 @@ import {
   Stack,
   CssBaseline,
   Alert,
-  Box,
   styled,
   AlertTitle,
   LinearProgress,
@@ -63,6 +62,7 @@ import useBoolean from '@mui/toolpad-utils/hooks/useBoolean';
 import usePageTitle from '@mui/toolpad-utils/hooks/usePageTitle';
 import invariant from 'invariant';
 import useEventCallback from '@mui/utils/useEventCallback';
+import { Box } from '@mui/system';
 import * as appDom from '../appDom';
 import { RuntimeState } from '../types';
 import { getBindingType, getBindingValue } from '../bindings';
@@ -886,6 +886,11 @@ function NodeError({ error }: NodeErrorProps) {
   );
 }
 
+const StyledInvisibleContent = styled(Typography)(({ theme }) => ({
+  textAlign: 'center',
+  color: theme.palette.primary.main,
+  border: `2px dotted ${theme.palette.primary.main}`,
+}));
 interface RenderedNodeContentProps {
   node: appDom.PageNode | appDom.ElementNode;
   childNodeGroups: appDom.NodeChildren<appDom.ElementNode>;
@@ -960,24 +965,6 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
     return hookResult;
   }, [argTypes, errorProp, errorPropSource, liveBindings, loadingProp, loadingPropSource, nodeId]);
-
-  const boundLayoutProps: Record<string, any> = React.useMemo(() => {
-    const hookResult: Record<string, any> = {};
-
-    for (const [propName, argType] of isLayoutNode ? [] : Object.entries(layoutBoxArgTypes)) {
-      const bindingId = `${nodeId}.layout.${propName}`;
-      const binding = liveBindings[bindingId];
-      if (binding) {
-        hookResult[propName] = binding.value;
-      }
-
-      if (typeof hookResult[propName] === 'undefined' && argType) {
-        hookResult[propName] = getArgTypeDefaultValue(argType);
-      }
-    }
-
-    return hookResult;
-  }, [isLayoutNode, liveBindings, nodeId]);
 
   const onChangeHandlers: Record<string, (param: any) => void> = React.useMemo(
     () =>
@@ -1110,13 +1097,11 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
         let wrappedValue = value;
         if (argType.control?.type === 'slots' || argType.control?.type === 'layoutSlot') {
-          wrappedValue = (
-            <Slots prop={propName} hasLayout={argType.control?.type === 'layoutSlot'}>
-              {value}
-            </Slots>
-          );
+          wrappedValue = <Slots prop={propName}>{value}</Slots>;
         } else if (argType.control?.type === 'slot') {
           wrappedValue = <Placeholder prop={propName}>{value}</Placeholder>;
+        } else if (argType.control?.type === 'buttons' && React.Children.count(value) === 0) {
+          wrappedValue = <Slots prop={propName}>{value}</Slots>;
         }
 
         if (isTemplate) {
@@ -1141,6 +1126,16 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
     return hookResult;
   }, [argTypes, node, props]);
 
+  const invisible = React.useMemo(() => {
+    if (wrappedProps.visible === undefined) {
+      return false;
+    }
+    if (wrappedProps.visible === false) {
+      return isRenderedInCanvas;
+    }
+    return false;
+  }, [wrappedProps]);
+
   const vmRef = React.useContext(ApplicationVmApiContext);
   React.useEffect(() => {
     if (!vmRef) {
@@ -1163,18 +1158,12 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
       componentConfig={Component[TOOLPAD_COMPONENT]}
       NodeError={NodeError}
     >
-      {isLayoutNode ? (
-        <Component {...wrappedProps} />
+      {invisible ? (
+        <StyledInvisibleContent {...wrappedProps} variant={'subtitle2'}>
+          This is invisible {node.name} component
+        </StyledInvisibleContent>
       ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: boundLayoutProps.verticalAlign,
-            justifyContent: boundLayoutProps.horizontalAlign,
-          }}
-        >
-          <Component {...wrappedProps} />
-        </Box>
+        <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
       )}
     </NodeRuntimeWrapper>
   );
@@ -1182,10 +1171,15 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
 interface PageRootProps {
   children?: React.ReactNode;
+  attributes: {
+    layout: appDom.PageLayoutMode;
+  };
 }
 
-function PageRoot({ children }: PageRootProps) {
-  return (
+function PageRoot({ children, attributes }: PageRootProps) {
+  const { layout } = attributes;
+  const isContainer = layout !== ('fluid' as appDom.PageLayoutMode);
+  return isContainer ? (
     <Container>
       <Stack
         data-testid="page-root"
@@ -1198,6 +1192,18 @@ function PageRoot({ children }: PageRootProps) {
         {children}
       </Stack>
     </Container>
+  ) : (
+    <Stack
+      data-testid="page-root"
+      direction="column"
+      sx={{
+        flex: 1,
+        gap: 1,
+        ...(isRenderedInCanvas ? { px: 3 } : {}),
+      }}
+    >
+      {children}
+    </Stack>
   );
 }
 

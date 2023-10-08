@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: page
+spec:
+  id: CSvBU20
+  title: page1
+  display: shell
+  content:
+    - component: ButtonGroup
+      name: buttonGroup
+      children:
+        - component: Button
+          name: button
+    - component: Stack
+      name: stack
+      children:
+        - component: Button
+          name: button1
+    - component: Paper
+      name: paper
+      children:
+        - component: codeComponent.test123
+          name: test123
+      props:
+        sx:
+          width: 500px
+    - component: List
+      name: list

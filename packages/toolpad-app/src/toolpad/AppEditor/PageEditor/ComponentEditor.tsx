@@ -51,7 +51,8 @@ function shouldRenderControl<P extends object>(
     return (
       propTypeDef.control?.type !== 'slot' &&
       propTypeDef.control?.type !== 'slots' &&
-      propTypeDef.control?.type !== 'layoutSlot'
+      propTypeDef.control?.type !== 'layoutSlot' &&
+      propTypeDef.control?.type !== 'buttons'
     );
   }
 

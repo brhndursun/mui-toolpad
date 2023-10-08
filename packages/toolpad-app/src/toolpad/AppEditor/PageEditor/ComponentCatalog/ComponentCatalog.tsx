@@ -15,6 +15,7 @@ import ArrowDropDownSharpIcon from '@mui/icons-material/ArrowDropDownSharp';
 import invariant from 'invariant';
 import InputAdornment from '@mui/material/InputAdornment';
 import AccountCircle from '@mui/icons-material/Search';
+import { uncapitalize } from '@mui/toolpad-utils/strings';
 import ComponentCatalogItem from './ComponentCatalogItem';
 import CreateCodeComponentNodeDialog from '../../PagesExplorer/CreateCodeComponentNodeDialog';
 import * as appDom from '../../../../appDom';
@@ -23,23 +24,6 @@ import { usePageEditorApi } from '../PageEditorProvider';
 import { useToolpadComponents } from '../../toolpadComponents';
 import useLocalStorageState from '../../../../utils/useLocalStorageState';
 import HelpTooltipIcon from '../../../../components/HelpTooltipIcon';
-
-interface FutureComponentSpec {
-  url: string;
-  displayName: string;
-}
-
-const FUTURE_COMPONENTS = new Map<string, FutureComponentSpec>([
-  ['Password', { url: 'https://github.com/mui/mui-toolpad/issues/2737', displayName: 'Password' }],
-  ['Map', { url: 'https://github.com/mui/mui-toolpad/issues/864', displayName: 'Map' }],
-  ['Drawer', { url: 'https://github.com/mui/mui-toolpad/issues/1540', displayName: 'Drawer' }],
-  ['Html', { url: 'https://github.com/mui/mui-toolpad/issues/1311', displayName: 'Html' }],
-  ['Icon', { url: 'https://github.com/mui/mui-toolpad/issues/83', displayName: 'Icon' }],
-  ['Card', { url: 'https://github.com/mui/mui-toolpad/issues/748', displayName: 'Card' }],
-  ['Slider', { url: 'https://github.com/mui/mui-toolpad/issues/746', displayName: 'Slider' }],
-  ['Switch', { url: 'https://github.com/mui/mui-toolpad/issues/745', displayName: 'Switch' }],
-  ['Radio', { url: 'https://github.com/mui/mui-toolpad/issues/744', displayName: 'Radio' }],
-]);
 
 const WIDTH_COLLAPSED = 40;
 
@@ -61,13 +45,9 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [searchFocused, setSearchFocused] = React.useState(false);
   const [openStart, setOpenStart] = React.useState(0);
-  const [openCustomComponents, setOpenCustomComponents] = useLocalStorageState(
-    'catalog-custom-expanded',
-    true,
-  );
-  const [openFutureComponents, setOpenFutureComponents] = useLocalStorageState(
-    'catalog-future-expanded',
-    true,
+  const [openGroupComponents, setOpenGroupComponents] = useLocalStorageState(
+    'catalog-group-expanded',
+    {} as any,
   );
 
   const closeTimeoutRef = React.useRef<NodeJS.Timeout>();
@@ -90,14 +70,23 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
     [openStart, setOpenStart],
   );
 
+  const toolpadComponents = useToolpadComponents(dom);
+
   const handleDragStart = (componentType: string) => (event: React.DragEvent<HTMLElement>) => {
+    const def = toolpadComponents[componentType];
+    invariant(def, `No component definition found for "${componentType}"`);
+
     event.dataTransfer.dropEffect = 'copy';
-    const newNode = appDom.createElement(dom, componentType, {});
+    const newNode = appDom.createElement(
+      dom,
+      def.builtIn || componentType,
+      def.initialProps || {},
+      undefined,
+      uncapitalize(def.displayName),
+    );
     api.newNodeDragStart(newNode);
     closeDrawer(0);
   };
-
-  const toolpadComponents = useToolpadComponents(dom);
 
   const handleMouseEnter = React.useCallback(() => openDrawer(), [openDrawer]);
   const handleMouseLeave = React.useCallback(() => closeDrawer(), [closeDrawer]);
@@ -113,8 +102,21 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
     [],
   );
 
+  const sortedData = React.useMemo(
+    () =>
+      Object.entries(toolpadComponents).sort(([nameA, componentA], [nameB, componentB]) => {
+        const groupComparison = componentA?.group.localeCompare(componentB?.group || '');
+        if (groupComparison === 0) {
+          return nameA.localeCompare(nameB);
+        }
+        return groupComparison || 0;
+      }),
+    [toolpadComponents],
+  );
+
   const filteredItems = React.useMemo(() => {
-    const entries = Object.entries(toolpadComponents);
+    const entries = sortedData;
+
     if (!searchTerm) {
       return entries;
     }
@@ -123,7 +125,7 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
       ([componentName, component]) =>
         regex.test(componentName) || component?.synonyms.some((name) => regex.test(name)),
     );
-  }, [toolpadComponents, searchTerm]);
+  }, [sortedData, searchTerm]);
 
   const drawerOpen = !!openStart || searchFocused;
 
@@ -194,22 +196,76 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
                   scrollbarGutter: 'stable',
                 }}
               >
-                <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" gap={1} padding={1}>
-                  {filteredItems.map(([componentId, componentType]) => {
-                    invariant(componentType, `No component definition found for "${componentId}"`);
-                    return componentType.builtIn && !componentType.system ? (
-                      <ComponentCatalogItem
-                        key={componentId}
-                        id={componentId}
-                        draggable
-                        onDragStart={handleDragStart(componentId)}
-                        displayName={componentType.displayName}
-                        builtIn={componentType.builtIn}
-                        kind={'builtIn'}
-                      />
-                    ) : null;
+                {[...new Set(filteredItems.map((item) => item[1]?.group || ''))]
+                  .filter((group) => group)
+                  .map((group) => {
+                    return (
+                      <React.Fragment key={group}>
+                        <Box
+                          pl={2}
+                          pr={1.5}
+                          pb={0}
+                          display="flex"
+                          flexDirection={'row'}
+                          justifyContent="space-between"
+                        >
+                          <Box display="flex" alignItems="center">
+                            <Typography mr={0.5} variant="overline">
+                              {group.toUpperCase()}
+                            </Typography>
+                          </Box>
+                          <IconButton
+                            aria-label="Expand custom components"
+                            sx={{
+                              p: 0,
+                              height: '100%',
+                              alignSelf: 'center',
+                              cursor: 'pointer',
+                              transform: `rotate(${openGroupComponents[group] ? 180 : 0}deg)`,
+                              transition: 'all 0.2s ease-in',
+                            }}
+                            onClick={() =>
+                              setOpenGroupComponents((prev: any) => ({
+                                ...prev,
+                                [group]: !prev[group],
+                              }))
+                            }
+                          >
+                            <ArrowDropDownSharpIcon />
+                          </IconButton>
+                        </Box>
+                        <Collapse in={openGroupComponents[group]} orientation={'vertical'}>
+                          <Box
+                            display="grid"
+                            gridTemplateColumns="1fr 1fr 1fr"
+                            gap={1}
+                            padding={1}
+                            pt={0}
+                          >
+                            {filteredItems
+                              .filter((item) => item[1]?.group === group)
+                              .map(([componentId, componentType]) => {
+                                invariant(
+                                  componentType,
+                                  `No component definition found for "${componentId}"`,
+                                );
+                                return componentType.builtIn && !componentType.system ? (
+                                  <ComponentCatalogItem
+                                    key={componentId}
+                                    id={componentId}
+                                    draggable
+                                    onDragStart={handleDragStart(componentId)}
+                                    displayName={componentType.displayName}
+                                    builtIn={componentType.builtIn}
+                                    kind={'builtIn'}
+                                  />
+                                ) : null;
+                              })}
+                          </Box>
+                        </Collapse>
+                      </React.Fragment>
+                    );
                   })}
-                </Box>
 
                 <Box
                   pl={2}
@@ -246,15 +302,20 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
                       height: '100%',
                       alignSelf: 'center',
                       cursor: 'pointer',
-                      transform: `rotate(${openCustomComponents ? 180 : 0}deg)`,
+                      transform: `rotate(${openGroupComponents.custom ? 180 : 0}deg)`,
                       transition: 'all 0.2s ease-in',
                     }}
-                    onClick={() => setOpenCustomComponents((prev) => !prev)}
+                    onClick={() =>
+                      setOpenGroupComponents((prev: any) => ({
+                        ...prev,
+                        custom: !prev.custom,
+                      }))
+                    }
                   >
                     <ArrowDropDownSharpIcon />
                   </IconButton>
                 </Box>
-                <Collapse in={openCustomComponents} orientation={'vertical'}>
+                <Collapse in={openGroupComponents.custom} orientation={'vertical'}>
                   <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" gap={1} padding={1} pt={0}>
                     {filteredItems.map(([componentId, componentType]) => {
                       invariant(
@@ -280,64 +341,6 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
                     />
                   </Box>
                 </Collapse>
-
-                <Box padding={1}>
-                  <Box
-                    sx={(theme) => ({
-                      py: 2,
-                      pl: 1,
-                      pr: 0.5,
-                      borderWidth: 1,
-                      borderStyle: 'solid',
-                      borderRadius: 1,
-                      backgroundColor: darken(theme.palette.background.default, 0.1),
-                      borderColor: theme.palette.divider,
-                    })}
-                  >
-                    <Box pb={0} display="flex" flexDirection={'row'} justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        More components coming soon!
-                      </Typography>
-                      <IconButton
-                        aria-label="Expand custom components"
-                        sx={{
-                          p: 0,
-                          height: '100%',
-                          alignSelf: 'start',
-                          cursor: 'pointer',
-                          transform: `rotate(${openFutureComponents ? 180 : 0}deg)`,
-                          transition: 'all 0.2s ease-in',
-                        }}
-                        onClick={() => setOpenFutureComponents((prev) => !prev)}
-                      >
-                        <ArrowDropDownSharpIcon />
-                      </IconButton>
-                    </Box>
-                    <Collapse in={openFutureComponents} orientation={'vertical'}>
-                      <Typography variant="caption" color="text.secondary">
-                        👍 Upvote on GitHub to get it prioritized.
-                      </Typography>
-                      <Box display="grid" gridTemplateColumns="1fr 1fr 1fr" gap={1} pt={1} pb={0}>
-                        {Array.from(FUTURE_COMPONENTS, ([key, { displayName, url }]) => {
-                          return (
-                            <Link
-                              href={url}
-                              underline="none"
-                              target="_blank"
-                              key={`futureComponent.${key}`}
-                            >
-                              <ComponentCatalogItem
-                                id={key}
-                                displayName={displayName}
-                                kind={'future'}
-                              />
-                            </Link>
-                          );
-                        })}
-                      </Box>
-                    </Collapse>
-                  </Box>
-                </Box>
               </Box>
             </Box>
           </Collapse>

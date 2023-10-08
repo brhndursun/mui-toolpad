@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: page
+spec:
+  id: iy8_wq5
+  title: ContainerTest
+  display: standalone
+  content:
+    - component: codeComponent.MyComponent
+      name: codeComponent_MyComponent
+    - component: Container
+      name: container
+      children:
+        - component: Paper
+          name: paper
+          props:
+            sx:
+              width: 100%
+          children:
+            - component: TextField
+              name: textField
+              props:
+                fullWidth: false
+            - component: Stack
+              name: textField1
+              props:
+                justifyContent: start
+                alignItems: start
+        - component: Stack
+          name: stack
+    - component: Form
+      name: form
+    - component: DatePicker
+      name: datePicker
+    - component: ButtonGroup
+      name: buttonGroup

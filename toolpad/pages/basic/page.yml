@@ -1,0 +1,360 @@
+apiVersion: v1
+kind: page
+spec:
+  id: 5q1xd0t
+  title: Page 1
+  content:
+    - component: Text
+      name: typography
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            `hello, message: ${hello.data.message}`
+    - component: Text
+      name: typography1
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            `throws, error.message: ${throws.error}`
+    - component: Text
+      name: typography2
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            `throws, data ${throws.error ? "had an error" : throws.data}`
+    - component: ButtonGroup
+      name: buttonGroup
+      children:
+        - component: Button
+          name: button4
+        - component: Button
+          name: button5
+      props:
+        fullWidth: false
+        orientation: horizontal
+        disabled: false
+        size: large
+        color: secondary
+        variant: outlined
+    - component: Paper
+      name: paper
+      children:
+        - component: ButtonGroup
+          name: buttonGroup1
+          props:
+            orientation: horizontal
+            fullWidth: true
+            size: medium
+            color: primary
+            variant: outlined
+            disabled: false
+            visible: false
+          layout:
+            horizontalAlign: start
+            verticalAlign: start
+          children:
+            - component: Button
+              name: button3
+              props:
+                variant: outlined
+            - component: Button
+              name: button6
+              props:
+                variant: outlined
+      props:
+        sx:
+          width: 500px
+    - component: ButtonGroup
+      name: buttonGroup2
+      props:
+        variant: outlined
+        size: medium
+    - component: ButtonGroup
+      name: buttonGroup3
+      props:
+        orientation: horizontal
+        disabled: false
+        fullWidth: false
+      children:
+        - component: Button
+          name: button10
+        - component: Button
+          name: button11
+          props:
+            sx:
+              background: red
+    - component: Container
+      name: container
+      props:
+        visible: false
+    - component: Form
+      name: form
+      props:
+        formControlsFullWidth: false
+        hasResetButton: false
+        formControlsAlign: end
+      children:
+        - component: TextField
+          name: textField
+        - component: TextField
+          name: textField1
+        - component: Button
+          name: button12
+    - component: Text
+      name: text8
+      props:
+        loading: true
+    - component: Text
+      name: markdown
+      props:
+        loading: false
+        mode: markdown
+    - component: Text
+      name: text4
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            `throws, data ${throwsError1.data}`
+    - component: DataGrid
+      name: dataGrid
+      layout:
+        columnSize: 1
+      props:
+        rows:
+          $$jsExpression: |
+            throws.data
+        height: 264
+    - component: Text
+      name: typography3
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            `echo, parameter: ${echo.data.params.foo}`
+    - component: PageRow
+      name: pageRow6
+      children:
+        - component: Text
+          name: typography4
+          props:
+            value:
+              $$jsExpression: |
+                `echo, secret: ${echo.data.secrets.bar}`
+        - component: Text
+          name: typography5
+          props:
+            value:
+              $$jsExpression: |
+                `echo, secret not in .env: ${echo.data.secrets.baz}`
+    - component: Text
+      name: text5
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            edited.data
+    - component: Button
+      name: button
+      layout:
+        columnSize: 1
+      props:
+        variant: outlined
+        size: medium
+        content: Run Manual Query
+        onClick:
+          $$jsExpressionAction: manualQuery.call()
+    - component: Text
+      name: text1
+      layout:
+        columnSize: 1
+      props:
+        value:
+          $$jsExpression: |
+            `destination: ${manualQuery.data?.parameters?.foo}`
+    - component: PageRow
+      name: pageRow7
+      children:
+        - component: Button
+          name: button1
+          props:
+            content: increment
+            onClick:
+              $$jsExpressionAction: |-
+                await increment.call()
+                getGlobal.refetch()
+        - component: Text
+          name: text
+          props:
+            value:
+              $$jsExpression: |
+                `global value: ${getGlobal.data}`
+    - component: Text
+      name: text3
+      props:
+        value:
+          $$jsExpression: |
+            `Propagated error: ${errorInput.error}`
+      layout:
+        columnSize: 1
+    - component: Text
+      name: text2
+      props:
+        value:
+          $$jsExpression: >
+            `Loading: ${alwaysLoading.isLoading}; Propagated loading:
+            ${propagatedLoading.isLoading}`
+      layout:
+        columnSize: 1
+    - component: Stack
+      name: stack
+      props:
+        justifyContent: start
+      children:
+        - component: Text
+          name: text7
+          layout:
+            columnSize: 1
+            horizontalAlign: start
+            verticalAlign: start
+          props:
+            value: null
+            loading: false
+            sx:
+              flex: 1
+        - component: Text
+          name: text6
+          layout:
+            columnSize: 1
+          props:
+            value: null
+            sx:
+              flex: 1
+    - component: Button
+      name: button2
+      props:
+        content: set cookie
+        onClick:
+          $$jsExpressionAction: |-
+            await setCustomCookie.call()
+            context.refetch()
+    - component: PageRow
+      name: pageRow
+      props:
+        justifyContent: start
+      children:
+        - component: Text
+          name: typography7
+          layout:
+            columnSize: 1
+          props:
+            value:
+              $$jsExpression: |
+                `echo, parameter: ${echo.data.params.foo}`
+        - component: Text
+          name: typography6
+          layout:
+            columnSize: 1
+          props:
+            value:
+              $$jsExpression: |
+                `echo, parameter: ${echo.data.params.foo}`
+  queries:
+    - name: hello
+      query:
+        function: hello
+        kind: local
+    - name: throws
+      query:
+        function: throws
+        kind: local
+    - name: echo
+      query:
+        function: echo
+        kind: local
+      parameters:
+        - name: foo
+          value:
+            $$jsExpression: |
+              "bound foo parameter"
+    - name: edited
+      query:
+        function: edited
+        kind: local
+    - name: withParams
+      query:
+        function: withParams
+        kind: local
+    - name: manualQuery
+      mode: mutation
+      query:
+        function: manualQueryWithParams
+        kind: local
+      parameters:
+        - name: foo
+          value:
+            $$jsExpression: |
+              "checksum"
+    - name: increment
+      mode: mutation
+      query:
+        function: increment
+        kind: local
+    - name: getGlobal
+      query:
+        function: getGlobal
+        kind: local
+    - name: errorInput
+      query:
+        function: echo
+        kind: local
+      parameters:
+        - name: foo
+          value:
+            $$jsExpression: |
+              (() => {
+                throw new Error("KABOOM!")
+              })()
+    - name: alwaysLoading
+      query:
+        function: neverResolving
+        kind: local
+    - name: propagatedLoading
+      query:
+        function: echo
+        kind: local
+      parameters:
+        - name: foo
+          value:
+            $$jsExpression: |
+              alwaysLoading.data
+    - name: throwsError1
+      query:
+        function: throwsMsg
+        kind: local
+      parameters:
+        - name: msg
+          value: threw error 1
+    - name: getRawText
+      query:
+        function: functions.ts#getRawText
+        kind: local
+    - name: context
+      query:
+        function: functions.ts#inspectContext
+        kind: local
+    - name: setCustomCookie
+      mode: mutation
+      query:
+        function: functions.ts#setCustomCookie
+        kind: local
+  layout: container

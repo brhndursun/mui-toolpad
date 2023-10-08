@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: page
+spec:
+  id: E0Sy-aL
+  title: ShellFluid
+  display: shell
+  content:
+    - component: Paper
+      name: paper
+      props:
+        sx:
+          background: '#CCC'
+    - component: Container
+      name: container
+      children:
+        - component: Paper
+          name: paper1
+        - component: Paper
+          name: paper2
+  layout: fluid

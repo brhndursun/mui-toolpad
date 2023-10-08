@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: page
+spec:
+  id: aRLvPZ7
+  title: FluidTest
+  display: standalone
+  content:
+    - component: Paper
+      name: paper
+      props:
+        sx:
+          background: '#CCC'

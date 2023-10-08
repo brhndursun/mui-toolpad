@@ -5,7 +5,7 @@ import { SX_PROP_HELPER_TEXT } from './constants';
 
 function Paper({ children, sx, ...rest }: MuiPaperProps) {
   return (
-    <MuiPaper sx={{ padding: 1, width: '100%', ...sx }} {...rest}>
+    <MuiPaper sx={{ padding: 1, width: 'fit-content', ...sx }} {...rest}>
       {children}
     </MuiPaper>
   );

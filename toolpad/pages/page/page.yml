@@ -1,0 +1,176 @@
+apiVersion: v1
+kind: page
+spec:
+  id: evZC-gp
+  title: Default page
+  queries:
+    - name: versionLastWeek
+      query:
+        kind: rest
+        url:
+          $$jsExpression: |
+            `https://api.npmjs.org/versions/${encodeURIComponent(
+              parameters.package
+            )}/last-week`
+        headers: []
+        method: GET
+        searchParams: []
+      parameters:
+        - name: package
+          value:
+            $$jsExpression: |
+              textField.value
+        - name: start_date
+          value:
+            $$jsExpression: |
+              datePicker.value
+        - name: end_date
+          value:
+            $$jsExpression: |
+              datePicker1.value
+    - name: totalRange
+      query:
+        kind: rest
+        url:
+          $$jsExpression: |
+            `https://api.npmjs.org/downloads/point/${parameters.start_date}:${
+              parameters.end_date
+            }/${encodeURIComponent(parameters.package)}`
+        headers: []
+        method: GET
+        searchParams: []
+      parameters:
+        - name: package
+          value:
+            $$jsExpression: |
+              textField.value
+        - name: start_date
+          value:
+            $$jsExpression: |
+              datePicker.value
+        - name: end_date
+          value:
+            $$jsExpression: |
+              datePicker1.value
+    - name: downloadsRange
+      query:
+        kind: rest
+        url:
+          $$jsExpression: |
+            `https://api.npmjs.org/downloads/range/${parameters.start_date}:${
+              parameters.end_date
+            }/${encodeURIComponent(parameters.package)}`
+        headers: []
+        method: GET
+        searchParams: []
+      parameters:
+        - name: package
+          value:
+            $$jsExpression: |
+              textField.value
+        - name: start_date
+          value:
+            $$jsExpression: |
+              datePicker.value
+        - name: end_date
+          value:
+            $$jsExpression: |
+              datePicker1.value
+  content:
+    - component: Text
+      name: text
+      layout:
+        columnSize: 1
+      props:
+        value: npm stats
+        variant: h3
+    - component: Stack
+      name: stack
+      children:
+        - component: TextField
+          name: textField
+          layout:
+            columnSize: 1.3448364990324768
+          props:
+            defaultValue: '@mui/toolpad'
+            label: package
+            fullWidth: true
+            sx:
+              flex: 2
+        - component: DatePicker
+          name: datePicker
+          layout:
+            columnSize: 1
+          props:
+            defaultValue:
+              $$jsExpression: |
+                new Date(new Date().setMonth(new Date().getMonth() - 1))
+                  .toISOString()
+                  .slice(0, 10)
+            label: since
+            fullWidth: true
+            sx:
+              flex: 1
+        - component: DatePicker
+          name: datePicker1
+          layout:
+            columnSize: 0.79451477149098
+          props:
+            label: until
+            fullWidth: true
+            defaultValue:
+              $$jsExpression: |
+                new Date().toISOString().slice(0, 10)
+            sx:
+              flex: 1
+      props:
+        justifyContent: start
+        gap: 1
+    - component: Text
+      name: text4
+      props:
+        value:
+          $$jsExpression: |
+            `Total downloads: ${totalRange.data.downloads}`
+        variant: body1
+      layout:
+        columnSize: 1
+    - component: Chart
+      name: downloadsChart
+      layout:
+        columnSize: 1
+      props:
+        data:
+          - kind: line
+            label: downloads
+            data:
+              $$jsExpression: |
+                downloadsRange.data.downloads
+            xKey: day
+            yKey: downloads
+            color: '#87bc45'
+        height: 300
+    - component: Text
+      name: text3
+      layout:
+        columnSize: 1
+      props:
+        value: Downloads by version (last week only)
+    - component: DataGrid
+      name: dataGrid
+      layout:
+        columnSize: 1
+      props:
+        rows:
+          $$jsExpression: |
+            Object.entries(versionLastWeek.data.downloads)
+        columns:
+          - field: '0'
+            type: string
+            headerName: Version
+            width: 160
+          - field: '1'
+            type: number
+            width: 152
+            headerName: No. of downloads
+  display: standalone

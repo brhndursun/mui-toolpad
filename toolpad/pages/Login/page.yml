@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: page
+spec:
+  id: m3XM3uN
+  title: Login
+  display: shell
+  content:
+    - component: Container
+      name: container
+      children:
+        - component: Paper
+          name: paper
+          layout:
+            verticalAlign: start
+          children:
+            - component: TextField
+              name: textField
+            - component: TextField
+              name: textField1
+            - component: Button
+              name: button
+        - component: Button
+          name: button1
+    - component: Paper
+      name: paper1
+    - component: Button
+      name: button2
