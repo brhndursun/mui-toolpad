@@ -261,6 +261,7 @@ export const pageSchema = toolpadObjectSchema(
   z.object({
     id: z.string().describe('Serves as a canonical id of the page.'),
     title: z.string().optional().describe('Title for this page.'),
+    slug: z.string().optional().describe('URL slug for this page.'),
     parameters: z
       .array(nameStringValuePairSchema)
       .optional()

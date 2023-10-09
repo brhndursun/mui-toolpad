@@ -25,9 +25,12 @@ export function withComponentButton<P extends Record<string, any>>(
   };
 }
 
-interface ButtonGroupProps extends MuiButtonGroupProps {}
+interface ButtonGroupProps extends MuiButtonGroupProps {
+  parentId: any;
+  __toolpadSlots: any;
+}
 
-function ButtonGroup({ children, ...props }: ButtonGroupProps) {
+function ButtonGroup({ children, parentId, __toolpadSlots, ...props }: ButtonGroupProps) {
   const groupContextValue = React.useMemo(() => ({ group: true, groupProps: props }), [props]);
 
   return (

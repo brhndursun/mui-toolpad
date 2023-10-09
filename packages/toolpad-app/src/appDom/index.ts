@@ -86,6 +86,7 @@ export type PageLayoutMode = 'container' | 'fluid';
 export interface PageNode extends AppDomNodeBase {
   readonly type: 'page';
   readonly attributes: {
+    readonly slug: string;
     readonly title: string;
     readonly parameters?: [string, string][];
     readonly module?: string;
@@ -384,7 +385,6 @@ export function getChildNodes<N extends AppDomNode>(dom: AppDom, parent: N): Nod
     const allNodeChildren: AppDomNode[] = Object.values(dom.nodes).filter(
       (node: AppDomNode) => node.parentId === parent.id,
     );
-
     for (const child of allNodeChildren) {
       const prop = child.parentProp || 'children';
       let existing = result[prop];
@@ -635,9 +635,9 @@ export function getExistingNamesForChildren<Parent extends AppDomNode>(
   dom: AppDom,
   parent: Parent,
   parentProp?: ParentProp<Parent>,
+  scope?: string,
 ): Set<string> {
   const pageNode = getPageAncestor(dom, parent);
-
   if (pageNode) {
     const pageDescendants = getDescendants(dom, pageNode);
     return new Set(pageDescendants.map((scopeNode) => scopeNode.name));
@@ -646,6 +646,9 @@ export function getExistingNamesForChildren<Parent extends AppDomNode>(
   if (parentProp) {
     const childNodes = getChildNodes(dom, parent);
     const { [parentProp]: children = [] } = childNodes;
+    if (scope) {
+      return new Set(children.map((scopeNode) => scopeNode.attributes[scope as keyof {}]));
+    }
     return new Set(children.map((scopeNode) => scopeNode.name));
   }
 
@@ -1111,6 +1114,7 @@ export function createDefaultDom(): AppDom {
       title: 'Page 1',
       display: 'shell',
       layout: 'container',
+      slug: 'page',
     },
   });
 

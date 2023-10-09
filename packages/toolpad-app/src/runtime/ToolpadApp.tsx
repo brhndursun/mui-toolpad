@@ -32,6 +32,7 @@ import {
   ApplicationVm,
   JsExpressionAttrValue,
   ComponentConfig,
+  RUNTIME_PROP_SLOTS,
 } from '@mui/toolpad-core';
 import { createProvidedContext, useAssertedContext } from '@mui/toolpad-utils/react';
 import { mapProperties, mapValues } from '@mui/toolpad-utils/collections';
@@ -1100,8 +1101,27 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
           wrappedValue = <Slots prop={propName}>{value}</Slots>;
         } else if (argType.control?.type === 'slot') {
           wrappedValue = <Placeholder prop={propName}>{value}</Placeholder>;
-        } else if (argType.control?.type === 'buttons' && React.Children.count(value) === 0) {
-          wrappedValue = <Slots prop={propName}>{value}</Slots>;
+        } else if (argType.control?.type === 'buttons') {
+          if (React.Children.count(value) === 0) {
+            wrappedValue = <Slots prop={propName}>{value}</Slots>;
+          } else {
+            // hookResult.parentId = nodeId;
+            // hookResult[RUNTIME_PROP_SLOTS] = propName;
+            // console.log(value);
+            wrappedValue = React.Children.map(value, (child) => (
+              <React.Fragment {...{ [RUNTIME_PROP_SLOTS]: propName, parentID: nodeId }}>
+                {React.cloneElement(child, { parentId: nodeId, [RUNTIME_PROP_SLOTS]: propName })}
+              </React.Fragment>
+            ));
+
+            // wrappedValue = <Slots prop={propName}>{value}</Slots>;
+
+            // wrappedValue = (
+            //   <React.Fragment parentId={nodeId} {...{ [RUNTIME_PROP_SLOTS]: propName }}>
+            //     {value}
+            //   </React.Fragment>
+            // );
+          }
         }
 
         if (isTemplate) {
@@ -1124,7 +1144,7 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
       }
     }
     return hookResult;
-  }, [argTypes, node, props]);
+  }, [argTypes, node, props, nodeId]);
 
   const invisible = React.useMemo(() => {
     if (wrappedProps.visible === undefined) {

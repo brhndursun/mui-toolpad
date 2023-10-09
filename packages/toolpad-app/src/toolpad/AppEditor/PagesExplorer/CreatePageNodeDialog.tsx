@@ -29,8 +29,13 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
     () => appDom.getExistingNamesForChildren(dom, appDom.getApp(dom), 'pages'),
     [dom],
   );
+  const existingSlugs = React.useMemo(
+    () => appDom.getExistingNamesForChildren(dom, appDom.getApp(dom), 'pages', 'slug'),
+    [dom],
+  );
 
   const [name, setName] = React.useState(appDom.proposeName(DEFAULT_NAME, existingNames));
+  const [slug, setSlug] = React.useState(appDom.proposeName(DEFAULT_NAME, existingSlugs));
 
   // Reset form
   const handleReset = useEventCallback(() =>
@@ -44,8 +49,10 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
   }, [open, handleReset]);
 
   const inputErrorMsg = useNodeNameValidation(name, existingNames, 'page');
+  const inputSlugErrorMsg = useNodeNameValidation(slug, existingSlugs, 'page');
   const isNameValid = !inputErrorMsg;
-  const isFormValid = isNameValid;
+  const isSlugValid = !inputSlugErrorMsg;
+  const isFormValid = isNameValid && isSlugValid;
 
   return (
     <Dialog open={open} onClose={onClose} {...props}>
@@ -59,7 +66,9 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
             name,
             attributes: {
               title: name,
-              display: 'shell',
+              display: 'standalone',
+              layout: 'fluid',
+              slug,
             },
           });
           const appNode = appDom.getApp(dom);
@@ -79,11 +88,22 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
             required
             autoFocus
             fullWidth
-            label="name"
+            label="Page Name"
             value={name}
             onChange={(event) => setName(event.target.value)}
             error={!isNameValid}
             helperText={inputErrorMsg}
+          />
+          <TextField
+            sx={{ my: 1 }}
+            required
+            autoFocus
+            fullWidth
+            label="Short Name"
+            value={slug}
+            onChange={(event) => setSlug(event.target.value)}
+            error={!isSlugValid}
+            helperText={inputSlugErrorMsg}
           />
         </DialogContent>
         <DialogActions>

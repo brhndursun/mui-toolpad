@@ -61,6 +61,7 @@ function PlaceholderWrapper(props: PlaceholderWrapperProps) {
       style={{
         minHeight: 72,
         minWidth: 200,
+        flex: 1,
       }}
     />
   );

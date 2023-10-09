@@ -506,6 +506,7 @@ function expandFromDom<N extends appDom.AppDomNode>(
         queries: undefinedWhenEmpty(expandChildren(children.queries || [], dom)),
         display: node.attributes.display,
         layout: node.attributes.layout,
+        slug: node.attributes.slug,
       },
     } satisfies Page;
   }
