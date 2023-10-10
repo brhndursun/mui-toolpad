@@ -890,6 +890,7 @@ function NodeError({ error }: NodeErrorProps) {
 const StyledInvisibleContent = styled(Typography)(({ theme }) => ({
   textAlign: 'center',
   color: theme.palette.primary.main,
+  padding: '5px',
   border: `2px dotted ${theme.palette.primary.main}`,
 }));
 interface RenderedNodeContentProps {
@@ -1147,11 +1148,8 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
   }, [argTypes, node, props, nodeId]);
 
   const invisible = React.useMemo(() => {
-    if (wrappedProps.visible === undefined) {
-      return false;
-    }
     if (wrappedProps.visible === false) {
-      return isRenderedInCanvas;
+      return true;
     }
     return false;
   }, [wrappedProps]);
@@ -1171,6 +1169,25 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
     };
   }, [nodeId, argTypes, vmRef, scope]);
 
+  if (isRenderedInCanvas) {
+    return (
+      <NodeRuntimeWrapper
+        nodeId={nodeId}
+        nodeName={node.name}
+        componentConfig={Component[TOOLPAD_COMPONENT]}
+        NodeError={NodeError}
+      >
+        {invisible ? (
+          <StyledInvisibleContent {...wrappedProps} variant={'subtitle2'}>
+            <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+          </StyledInvisibleContent>
+        ) : (
+          <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+        )}
+      </NodeRuntimeWrapper>
+    );
+  }
+
   return (
     <NodeRuntimeWrapper
       nodeId={nodeId}
@@ -1178,13 +1195,11 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
       componentConfig={Component[TOOLPAD_COMPONENT]}
       NodeError={NodeError}
     >
-      {invisible ? (
-        <StyledInvisibleContent {...wrappedProps} variant={'subtitle2'}>
-          This is invisible {node.name} component
-        </StyledInvisibleContent>
-      ) : (
-        <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
-      )}
+      <React.Fragment>
+        {!invisible && (
+          <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+        )}
+      </React.Fragment>
     </NodeRuntimeWrapper>
   );
 }
