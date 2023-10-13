@@ -64,7 +64,7 @@ function AppPagesNavigation({
           <ListItem key={page.slug} disablePadding>
             <ListItemButton
               component={Link}
-              to={`pages/${page.slug}${search}`}
+              to={`${page.slug}${search}`}
               selected={activePage === page.slug}
             >
               <ListItemText primary={page.displayName} sx={{ ml: 2 }} />

@@ -18,3 +18,4 @@ spec:
         - component: Paper
           name: paper2
   layout: fluid
+  slug: [shell-fluid]

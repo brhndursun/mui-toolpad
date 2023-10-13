@@ -25,7 +25,7 @@ const Drawer = styled(MuiDrawer)({
 const navigationOptions = [
   {
     name: 'Pages',
-    path: '/app/pages',
+    path: '/app',
     icon: ArticleIcon,
   },
   {

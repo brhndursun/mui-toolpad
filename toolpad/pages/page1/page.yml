@@ -25,3 +25,4 @@ spec:
           width: 500px
     - component: List
       name: list
+  slug: [page1]

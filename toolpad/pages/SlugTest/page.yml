@@ -4,5 +4,48 @@ spec:
   id: DLDNAol
   title: SlugTestsas
   display: standalone
-  layout: fluid
-  slug: qwe
+  layout: container
+  slug: [slug-test, slug-test/:id]
+  content:
+    - component: Stack
+      name: stack
+      props:
+        justifyContent: start
+      children:
+        - component: Text
+          name: slug1
+          props:
+            value: Page Slug is
+        - component: Text
+          name: slug
+          props:
+            value:
+              $$jsExpression: |
+                test
+  queries:
+    - name: query
+      query:
+        function: getURL.ts#default
+        kind: local
+      parameters:
+        - name: message
+          value:
+            $$jsExpression: |
+              page.parameters.page
+    - name: query1
+      query:
+        kind: rest
+        headers: []
+        method: GET
+        transform: return data.movies[0].title;
+        transformEnabled: true
+        searchParams: []
+    - name: query2
+      query:
+        function: getURL.ts#default
+        kind: local
+      parameters:
+        - name: message
+          value:
+            $$jsExpression: |
+              query1.data

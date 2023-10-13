@@ -282,7 +282,7 @@ export default function ComponentCatalog({ className }: ComponentCatalogProps) {
                     <HelpTooltipIcon
                       helpText={
                         <Typography variant="inherit">
-                          Expand Toolpad with your own React components.{' '}
+                          Expand Toolpad with your own React components.
                           <Link
                             href="https://mui.com/toolpad/concepts/custom-components"
                             target="_blank"

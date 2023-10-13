@@ -10,3 +10,5 @@ spec:
       props:
         sx:
           background: '#CCC'
+  slug:
+    - fluid-test

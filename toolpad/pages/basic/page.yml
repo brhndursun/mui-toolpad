@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: page
 spec:
@@ -358,3 +359,5 @@ spec:
         function: functions.ts#setCustomCookie
         kind: local
   layout: container
+  slug:
+    - basic

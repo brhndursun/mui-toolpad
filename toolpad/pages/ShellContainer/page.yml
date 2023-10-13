@@ -113,3 +113,4 @@ spec:
       name: textField
     - component: Autocomplete
       name: autocomplete
+  slug: [shell-container]

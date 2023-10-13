@@ -149,7 +149,7 @@ function usePageNavigator(): NavigateToPage {
         canvasEvents.emit('pageNavigationRequest', { pageNodeId });
       } else {
         navigate({
-          pathname: `/pages/${pageNodeId}`,
+          pathname: `/${pageNodeId}`,
           ...(urlParams
             ? {
                 search: urlParams.toString(),
@@ -1461,13 +1461,13 @@ interface RenderedPagesProps {
 function RenderedPages({ pages }: RenderedPagesProps) {
   const defaultPage = pages[0];
 
-  const defaultPageNavigation = <Navigate to={`/pages/${defaultPage.id}`} replace />;
+  const defaultPageNavigation = <Navigate to={`/${defaultPage.id}`} replace />;
   return (
     <Routes>
       {pages.map((page) => (
         <React.Fragment key={page.id}>
           <Route
-            path={`/pages/${page.id}`}
+            path={`/${page.id}`}
             element={
               <RenderedPage
                 nodeId={page.id}
@@ -1481,13 +1481,10 @@ function RenderedPages({ pages }: RenderedPagesProps) {
       ))}
       {pages.map((page) => (
         <React.Fragment key={page.id}>
-          <Route
-            path={`/pages/${page.name}`}
-            element={<Navigate to={`/pages/${page.id}`} replace />}
-          />
+          <Route path={`/${page.name}`} element={<Navigate to={`/${page.id}`} replace />} />
         </React.Fragment>
       ))}
-      <Route path="/pages" element={defaultPageNavigation} />
+      {/* <Route path="/pages" element={defaultPageNavigation} /> */}
       <Route path="/" element={defaultPageNavigation} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -1526,7 +1523,7 @@ function ToolpadAppLayout({ dom }: ToolpadAppLayoutProps) {
   const root = appDom.getApp(dom);
   const { pages = [] } = appDom.getChildNodes(dom, root);
 
-  const pageMatch = useMatch('/pages/:slug');
+  const pageMatch = useMatch('/:slug');
   const pageId = pageMatch?.params.slug;
 
   const showPreviewHeader = isPreview && !isRenderedInCanvas && !isCustomServer;

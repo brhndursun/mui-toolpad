@@ -96,3 +96,5 @@ spec:
       name: filePicker
     - component: Rating
       name: rating
+  slug:
+    - container-test

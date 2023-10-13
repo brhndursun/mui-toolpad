@@ -23,7 +23,7 @@ export default function PreviewHeader({ pageId }: PreviewHeaderProps) {
               endIcon={<EditIcon />}
               color="primary"
               component="a"
-              href={pageId ? `/_toolpad/app/pages/${pageId}` : '/_toolpad/app'}
+              href={pageId ? `/_toolpad/app/${pageId}` : '/_toolpad/app'}
             >
               Edit
             </Button>

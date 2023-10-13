@@ -25,3 +25,4 @@ spec:
       name: paper1
     - component: Button
       name: button2
+  slug: [login]

@@ -86,7 +86,7 @@ export type PageLayoutMode = 'container' | 'fluid';
 export interface PageNode extends AppDomNodeBase {
   readonly type: 'page';
   readonly attributes: {
-    readonly slug: string;
+    readonly slug: string[];
     readonly title: string;
     readonly parameters?: [string, string][];
     readonly module?: string;
@@ -1114,7 +1114,7 @@ export function createDefaultDom(): AppDom {
       title: 'Page 1',
       display: 'shell',
       layout: 'container',
-      slug: 'page',
+      slug: ['page'],
     },
   });
 
