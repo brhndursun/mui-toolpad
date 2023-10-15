@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -12,9 +13,10 @@ import useEventCallback from '@mui/utils/useEventCallback';
 import * as appDom from '../../../appDom';
 import DialogForm from '../../../components/DialogForm';
 import { useAppStateApi, useAppState } from '../../AppState';
-import { useNodeNameValidation } from './validation';
+import { useNodeNameValidation, useNodeSlugValidation } from './validation';
 
 const DEFAULT_NAME = 'page';
+const DEFAULT_SLUG = ['page'];
 
 export interface CreatePageDialogProps {
   open: boolean;
@@ -35,7 +37,7 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
   );
 
   const [name, setName] = React.useState(appDom.proposeName(DEFAULT_NAME, existingNames));
-  const [slug, setSlug] = React.useState(appDom.proposeName(DEFAULT_NAME, existingSlugs));
+  const [slug, setSlug] = React.useState(DEFAULT_SLUG);
 
   // Reset form
   const handleReset = useEventCallback(() =>
@@ -49,7 +51,7 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
   }, [open, handleReset]);
 
   const inputErrorMsg = useNodeNameValidation(name, existingNames, 'page');
-  const inputSlugErrorMsg = useNodeNameValidation(slug, existingSlugs, 'page');
+  const inputSlugErrorMsg = useNodeSlugValidation(slug, existingSlugs, 'page');
   const isNameValid = !inputErrorMsg;
   const isSlugValid = !inputSlugErrorMsg;
   const isFormValid = isNameValid && isSlugValid;
@@ -94,16 +96,25 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
             error={!isNameValid}
             helperText={inputErrorMsg}
           />
-          <TextField
+          <Autocomplete
+            multiple
+            limitTags={2}
+            freeSolo
             sx={{ my: 1 }}
-            required
-            autoFocus
             fullWidth
-            label="Short Name"
             value={slug}
-            onChange={(event) => setSlug(event.target.value)}
-            error={!isSlugValid}
-            helperText={inputSlugErrorMsg}
+            onChange={(_, value) => {
+              setSlug(value);
+            }}
+            options={[]}
+            renderInput={(params) => (
+              <TextField
+                error={!isSlugValid}
+                helperText={inputSlugErrorMsg}
+                label="Page Slug"
+                {...params}
+              />
+            )}
           />
         </DialogContent>
         <DialogActions>

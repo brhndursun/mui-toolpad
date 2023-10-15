@@ -5,7 +5,7 @@ spec:
   title: SlugTestsas
   display: standalone
   layout: container
-  slug: [slug-test, slug-test/:id]
+  slug: [slug-test/:cat, slug-test/:cat/:id, slug-test/te:teId, slug-test]
   content:
     - component: Stack
       name: stack
@@ -21,31 +21,16 @@ spec:
           props:
             value:
               $$jsExpression: |
-                test
+                JSON.stringify(page.parameters.pageParams)
+        - component: Text
+          name: slug2
+          props:
+            value:
+              $$jsExpression: |
+                page.parameters.pageParams.cat
   queries:
     - name: query
+      mode: mutation
       query:
         function: getURL.ts#default
         kind: local
-      parameters:
-        - name: message
-          value:
-            $$jsExpression: |
-              page.parameters.page
-    - name: query1
-      query:
-        kind: rest
-        headers: []
-        method: GET
-        transform: return data.movies[0].title;
-        transformEnabled: true
-        searchParams: []
-    - name: query2
-      query:
-        function: getURL.ts#default
-        kind: local
-      parameters:
-        - name: message
-          value:
-            $$jsExpression: |
-              query1.data

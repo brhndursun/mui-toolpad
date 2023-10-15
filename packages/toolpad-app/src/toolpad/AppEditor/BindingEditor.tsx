@@ -430,6 +430,7 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
           </MenuItem>
         ))}
       </TextField>
+      {/* TODO: Add Page Slug */}
       {actionParameterEntries.length > 0 ? (
         <React.Fragment>
           <Typography variant="overline">Page parameters:</Typography>

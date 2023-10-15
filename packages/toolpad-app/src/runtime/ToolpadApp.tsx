@@ -386,6 +386,21 @@ function parseBinding(
     result: { value: undefined },
   };
 }
+function clearFirstSlash(path: string) {
+  return path.charAt(0) === '/' ? path.replace(/^./, '') : path;
+}
+function matchPath(pathname: string, route: string) {
+  const regex = new RegExp(`^${route.replace(/\//g, '\\/').replace(/:\w+/g, '([^/]+)')}$`);
+  const match = pathname.match(regex);
+  const params: { [key: string]: string } = {};
+  const keys = route.match(/:(\w+)/g);
+  if (keys) {
+    keys.forEach((key, index) => {
+      params[key.slice(1)] = match ? match[index + 1] : '';
+    });
+  }
+  return params;
+}
 
 /**
  * Returns all elements for the current scope. This includes the root node and all of its descendants.
@@ -625,6 +640,38 @@ function parseBindings(
           result: { value: urlParams.get(paramName) || paramDefault },
         });
       }
+      parsedBindingsMap.set(`${rootNode.id}.parameters.slug`, {
+        scopePath: `page.parameters.slug`,
+        result: { value: rootNode.attributes.slug },
+      });
+
+      const pageParams: { [key: string]: string } = {};
+      rootNode.attributes.slug?.forEach((path) => {
+        const pathParams = matchPath(clearFirstSlash(location.pathname), clearFirstSlash(path));
+        if (!pathParams) {
+          return;
+        }
+        Object.entries(pathParams).forEach(([key, value]) => {
+          if (Object.keys(pageParams).indexOf(key) < 0) {
+            pageParams[key] = value;
+          } else if (!pageParams[key]) {
+            pageParams[key] = value;
+          }
+        });
+      });
+      parsedBindingsMap.set(`${rootNode.id}.parameters.pageParams`, {
+        scopePath: `page.parameters.pageParams`,
+        result: { value: pageParams },
+      });
+
+      parsedBindingsMap.set(`${rootNode.id}.parameters.location`, {
+        scopePath: `page.parameters.location`,
+        result: { value: location },
+      });
+      parsedBindingsMap.set(`${rootNode.id}.parameters.location`, {
+        scopePath: `page.parameters.location`,
+        result: { value: location },
+      });
     }
   }
 
@@ -1477,6 +1524,17 @@ function RenderedPages({ pages }: RenderedPagesProps) {
               />
             }
           />
+        </React.Fragment>
+      ))}
+      {pages.map((page) => (
+        <React.Fragment key={page.id}>
+          {page.attributes.slug?.map((path) => (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={<RenderedPage nodeId={page.id} key={page.id} />}
+            />
+          ))}
         </React.Fragment>
       ))}
       {pages.map((page) => (

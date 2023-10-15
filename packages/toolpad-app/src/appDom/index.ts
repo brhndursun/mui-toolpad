@@ -457,6 +457,43 @@ function slugifyNodeName(nameCandidate: string, fallback: string): string {
   return slug;
 }
 
+export function validateNodeSlug(slugs: string[], disallowedNames: Set<string>, kind: string) {
+  const a = slugs.map((slug) => {
+    if (!slug) {
+      return 'a slug is required';
+    }
+
+    const firstLetter = slug[0];
+    if (!/[a-z_]/i.test(firstLetter)) {
+      return `${kind} may not start with a "${firstLetter}"`;
+    }
+
+    const match = /([^a-zA-Z0-9:_\-/])/i.exec(slug);
+
+    if (match) {
+      const invalidCharacter = match[1];
+      if (/\s/.test(invalidCharacter)) {
+        return `${kind} may not contain spaces`;
+      }
+      return `${kind} may not contain a "${invalidCharacter}"`;
+    }
+
+    // TODO: Check for duplicate ?
+    // const slug = slugifyNodeName(slug, kind);
+
+    // const isDuplicate = disallowedNames.has(slug);
+
+    // if (isDuplicate) {
+    //   return `There already is a ${kind} with this slug`;
+    // }
+
+    return null;
+  })[0];
+  console.log(a);
+
+  return a;
+}
+
 export function validateNodeName(name: string, disallowedNames: Set<string>, kind: string) {
   if (!name) {
     return 'a name is required';
