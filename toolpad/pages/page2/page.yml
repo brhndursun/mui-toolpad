@@ -1,9 +1,8 @@
 apiVersion: v1
 kind: page
 spec:
-  id: gHRFM2d
-  title: page2
+  id: VL1vLQx
+  title: Page2
   display: standalone
-  layout: fluid
-  slug:
-    - page
+  layout: container
+  slug: [page2, page2:id]

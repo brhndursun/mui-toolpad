@@ -29,7 +29,9 @@ export interface JsExpressionAction {
 export interface NavigationAction<P = any> {
   $$navigationAction: {
     page: string;
+    slug: string;
     parameters?: BindableAttrValues<P>;
+    slugParameters?: BindableAttrValues<P>;
   };
 }
 
