@@ -42,7 +42,7 @@ export default createBuiltin(withComponentButton(Button), {
     color: {
       helperText: 'The theme color of the component.',
       type: 'string',
-      enum: ['primary', 'secondary'],
+      enum: ['primary', 'secondary', 'info', 'success', 'warning', 'error'],
       default: 'primary',
     },
     fullWidth: {

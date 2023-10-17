@@ -28,9 +28,16 @@ spec:
             value:
               $$jsExpression: |
                 page.parameters.pageParams.cat
+    - component: Button
+      name: button
+      props:
+        color: primary
   queries:
     - name: query
       mode: mutation
       query:
         function: getURL.ts#default
         kind: local
+  parameters:
+    - name: aa
+      value: ss

@@ -107,6 +107,8 @@ function ComponentPropsEditor<P extends object>({
 
   return (
     <React.Fragment>
+      {/*
+      TODO: 32bit Activate layout controls for all components. be aware, slots removed so we dont have this ability. 
       {hasLayoutControls ? (
         <React.Fragment>
           <Typography variant="overline" className={classes.sectionHeading}>
@@ -138,7 +140,7 @@ function ComponentPropsEditor<P extends object>({
 
           <Divider sx={{ mt: 1 }} />
         </React.Fragment>
-      ) : null}
+      ) : null} */}
       {Object.entries(argTypesByCategory).map(([category, argTypeEntries]) => (
         <React.Fragment key={category}>
           <Typography variant="overline" className={classes.sectionHeading}>

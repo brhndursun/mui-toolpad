@@ -47,6 +47,9 @@ import {
   Location as RouterLocation,
   useNavigate,
   useMatch,
+  useMatches,
+  useParams,
+  matchRoutes,
 } from 'react-router-dom';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import {
@@ -87,6 +90,7 @@ import { NavigateToPage } from './CanvasHooksContext';
 import PreviewHeader from './PreviewHeader';
 import { AppLayout } from './AppLayout';
 import api, { queryClient } from './api';
+import { findPath } from '../utils/matchPath';
 
 const browserJsRuntime = getBrowserRuntime();
 
@@ -1581,8 +1585,22 @@ function ToolpadAppLayout({ dom }: ToolpadAppLayoutProps) {
   const root = appDom.getApp(dom);
   const { pages = [] } = appDom.getChildNodes(dom, root);
 
+  const location = useLocation();
+
   const pageMatch = useMatch('/:slug');
-  const pageId = pageMatch?.params.slug;
+
+  const pageId: string | undefined = React.useMemo(() => {
+    const slugs = ([] as string[])
+      .concat(...pages.map((page) => page.attributes.slug))
+      .map((route) => ({ path: route }));
+    const [{ route }] = matchRoutes(slugs, location) ?? [{}];
+    if (!route?.path) {
+      return pageMatch?.params.slug;
+    }
+    return pages.find((page) => {
+      return page.attributes.slug.includes(route.path);
+    })?.id;
+  }, [location, pages, pageMatch]);
 
   const showPreviewHeader = isPreview && !isRenderedInCanvas && !isCustomServer;
 
@@ -1590,6 +1608,7 @@ function ToolpadAppLayout({ dom }: ToolpadAppLayoutProps) {
     () =>
       pages.map((page) => ({
         slug: page.id,
+        slugs: page.attributes.slug,
         displayName: page.name,
         hasShell: page?.attributes.display !== 'standalone',
       })),

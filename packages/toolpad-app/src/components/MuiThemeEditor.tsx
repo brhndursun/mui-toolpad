@@ -93,7 +93,9 @@ export default function MuiThemeEditor({ value, onChange }: MuiThemeEditorProps)
     [value?.palette?.mode],
   );
 
-  const colorPicker = (intent: 'primary' | 'secondary') => (
+  const colorPicker = (
+    intent: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error',
+  ) => (
     <PaletteColorPicker
       label={capitalize(intent)}
       value={
@@ -119,7 +121,8 @@ export default function MuiThemeEditor({ value, onChange }: MuiThemeEditorProps)
 
   return (
     <Stack direction="column" spacing={2}>
-      <ToggleButtonGroup
+      {/* TODO: 32bit Dark Light entegrasyonu düzenlenmeli */}
+      {/* <ToggleButtonGroup
         exclusive
         value={value?.palette?.mode || defaultTheme.palette.mode}
         onChange={(event, newMode: PaletteMode | null) => {
@@ -143,11 +146,19 @@ export default function MuiThemeEditor({ value, onChange }: MuiThemeEditorProps)
           <DarkModeIcon />
           Dark
         </IconToggleButton>
-      </ToggleButtonGroup>
+      </ToggleButtonGroup> */}
 
       {colorPicker('primary')}
 
       {colorPicker('secondary')}
+
+      {colorPicker('info')}
+
+      {colorPicker('success')}
+
+      {colorPicker('warning')}
+
+      {colorPicker('error')}
     </Stack>
   );
 }

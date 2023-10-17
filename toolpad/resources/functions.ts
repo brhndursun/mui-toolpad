@@ -7,3 +7,8 @@ export function GetPageUrl() {
 
   return ss;
 }
+
+export const ChangeTheme = () => {
+  const [currentTheme, toggleTheme] = React.useState('light');
+  return currentTheme;
+};

@@ -5,5 +5,5 @@ spec:
     palette:
       mode: light
       primary:
-        main: '#ac2424'
+        main: '#2196f3'
         contrastText: '#fff'

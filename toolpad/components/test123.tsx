@@ -13,8 +13,7 @@ function test123({ msg }: Test123Props) {
     <React.Fragment>
       <Typography>{msg}</Typography>
       <ButtonGroup variant="contained">
-        <Button>Test1</Button>
-        <Button>Test2</Button>
+        <Button>Yapım aşamasında</Button>
       </ButtonGroup>
     </React.Fragment>
   );

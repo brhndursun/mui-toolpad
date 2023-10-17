@@ -1,10 +1,31 @@
-import { CircularProgress, Box, styled, CssBaseline, Button, Stack, Tooltip } from '@mui/material';
+import {
+  CircularProgress,
+  Box,
+  styled,
+  CssBaseline,
+  Button,
+  Stack,
+  Tooltip,
+  ButtonGroup,
+  Popper,
+  Grow,
+  Paper,
+  MenuList,
+  ClickAwayListener,
+  MenuItem,
+  Menu,
+  ListItemText,
+} from '@mui/material';
 import * as React from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import SyncIcon from '@mui/icons-material/Sync';
+import LightModeOutlined from '@mui/icons-material/LightMode';
+import DarkModeOutlined from '@mui/icons-material/DarkMode';
+import SettingsBrightnessOutlined from '@mui/icons-material/SettingsBrightnessOutlined';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import SyncProblemIcon from '@mui/icons-material/SyncProblem';
 import { QueryClientProvider } from '@tanstack/react-query';
 import AppEditor from './AppEditor';
@@ -16,6 +37,7 @@ import { getViewFromPathname } from '../utils/domView';
 import AppProvider, { AppState, useAppStateContext } from './AppState';
 import { GLOBAL_FUNCTIONS_FEATURE_FLAG } from '../constants';
 import { queryClient } from '../api';
+import useMenu from '../utils/useMenu';
 
 const Centered = styled('div')({
   height: '100%',
@@ -84,6 +106,8 @@ function EditorShell({ children }: EditorShellProps) {
 
   const location = useLocation();
 
+  const { buttonProps, menuProps, onMenuClose } = useMenu();
+
   const shellProps = React.useMemo(() => {
     const currentView = getViewFromPathname(location.pathname);
 
@@ -94,25 +118,43 @@ function EditorShell({ children }: EditorShellProps) {
 
       return {
         actions: (
-          <Stack direction="row" gap={1} alignItems="center">
-            <Button
-              variant="outlined"
-              endIcon={<OpenInNewIcon />}
-              color="primary"
-              component="a"
-              href={previewPath}
-              target="_blank"
-            >
-              Preview
-            </Button>
-          </Stack>
+          <React.Fragment>
+            <Stack direction="row" gap={1} alignItems="center">
+              <ButtonGroup>
+                <Button
+                  variant="outlined"
+                  endIcon={<OpenInNewIcon />}
+                  color="primary"
+                  component="a"
+                  href={previewPath}
+                  target="_blank"
+                >
+                  Preview
+                </Button>
+                <Button size="small" {...buttonProps}>
+                  <ArrowDropDownIcon />
+                </Button>
+              </ButtonGroup>
+            </Stack>
+
+            <Menu {...menuProps}>
+              <MenuItem
+                onClick={(event) => {
+                  // onChange(event, option.value);
+                  onMenuClose();
+                }}
+              >
+                <ListItemText primary={'Yapım aşamasında'} />
+              </MenuItem>
+            </Menu>
+          </React.Fragment>
         ),
         status: getAppSaveState(appState),
       };
     }
 
     return {};
-  }, [appState, location.pathname]);
+  }, [appState, location.pathname, buttonProps, menuProps, onMenuClose]);
 
   return <ToolpadShell {...shellProps}>{children}</ToolpadShell>;
 }
