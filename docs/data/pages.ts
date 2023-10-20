@@ -7,6 +7,7 @@ const pages: MuiPage[] = [
     children: [
       { pathname: '/toolpad/getting-started/overview' },
       { pathname: '/toolpad/getting-started/installation' },
+      { pathname: '/toolpad/getting-started/why-toolpad', title: 'Why Toolpad?' },
       { pathname: '/toolpad/getting-started/first-app', title: 'Build your first app' },
       {
         pathname: '/toolpad/examples-group',
@@ -19,6 +20,10 @@ const pages: MuiPage[] = [
         ],
       },
       { pathname: '/toolpad/getting-started/roadmap' },
+      {
+        pathname: '/toolpad/support/support',
+        title: 'Support',
+      },
     ],
   },
   {
@@ -29,8 +34,8 @@ const pages: MuiPage[] = [
         title: 'Building UI',
       },
       {
-        pathname: '/toolpad/concepts/queries-',
-        title: 'Queries',
+        pathname: '/toolpad/concepts/connecting-to-data',
+        title: 'Connecting to data',
         children: [
           {
             pathname: '/toolpad/concepts/queries',
@@ -43,6 +48,10 @@ const pages: MuiPage[] = [
           {
             pathname: '/toolpad/concepts/custom-functions',
             title: 'Custom functions',
+          },
+          {
+            pathname: '/toolpad/concepts/data-providers',
+            title: 'Data providers',
           },
         ],
       },
@@ -164,12 +173,16 @@ const pages: MuiPage[] = [
             subheader: 'Functions',
             children: [
               {
-                title: 'createFunction',
-                pathname: '/toolpad/reference/api/create-function',
-              },
-              {
                 title: 'createComponent',
                 pathname: '/toolpad/reference/api/create-component',
+              },
+              {
+                title: 'createDataProvider',
+                pathname: '/toolpad/reference/api/create-data-provider',
+              },
+              {
+                title: 'createFunction',
+                pathname: '/toolpad/reference/api/create-function',
               },
               {
                 title: 'getContext',

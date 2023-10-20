@@ -5,14 +5,13 @@ import express, { Router } from 'express';
 import cors from 'cors';
 import invariant from 'invariant';
 import { errorFrom, serializeError, SerializedError } from '@mui/toolpad-utils/errors';
-import { Methods, ServerDataSource, ToolpadProjectOptions } from '../types';
+import type { RuntimeConfig, Methods, ServerDataSource, ToolpadProjectOptions } from '../types';
 import serverDataSources from '../toolpadDataSources/server';
 import * as appDom from '../appDom';
 import applyTransform from '../toolpadDataSources/applyTransform';
 import { asyncHandler } from '../utils/express';
 import type FunctionsManager from './FunctionsManager';
 import type EnvManager from './EnvManager';
-import type { RuntimeConfig } from '../config';
 
 function withSerializedError<T extends { error?: unknown }>(
   withError: T,
@@ -27,10 +26,10 @@ interface IToolpadProject {
   options: ToolpadProjectOptions;
   getRoot(): string;
   loadDom(): Promise<appDom.AppDom>;
-  saveDom(dom: appDom.AppDom): Promise<{ fingerprint: number }>;
+  saveDom(dom: appDom.AppDom): Promise<void>;
   functionsManager: FunctionsManager;
   envManager: EnvManager;
-  getRuntimeConfig: () => RuntimeConfig;
+  getRuntimeConfig: () => Promise<RuntimeConfig>;
 }
 
 /**

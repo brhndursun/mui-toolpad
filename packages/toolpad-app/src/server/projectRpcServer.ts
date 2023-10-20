@@ -1,7 +1,7 @@
 import { createMethod, MethodResolvers } from './rpc';
 import type { ToolpadProject } from './localMode';
 
-// Methods exposed to the Toolpad editor
+// Methods exposing the actions on the Toolpad project
 export function createRpcServer(project: ToolpadProject) {
   return {
     dataSourceFetchPrivate: createMethod<typeof project.dataManager.dataSourceFetchPrivate>(
@@ -17,6 +17,9 @@ export function createRpcServer(project: ToolpadProject) {
     }),
     getVersionInfo: createMethod<typeof project.getVersionInfo>(({ params }) => {
       return project.getVersionInfo(...params);
+    }),
+    introspect: createMethod<typeof project.functionsManager.introspect>(({ params }) => {
+      return project.functionsManager.introspect(...params);
     }),
     getPrettierConfig: createMethod<typeof project.getPrettierConfig>(({ params }) => {
       return project.getPrettierConfig(...params);
@@ -41,6 +44,12 @@ export function createRpcServer(project: ToolpadProject) {
         return project.dataManager.dataSourceExecPrivate(...params);
       },
     ),
+    createDataProvider: createMethod<typeof project.createDataProvider>(({ params }) => {
+      return project.createDataProvider(...params);
+    }),
+    getRuntimeConfig: createMethod<typeof project.getRuntimeConfig>(({ params }) => {
+      return project.getRuntimeConfig(...params);
+    }),
   } satisfies MethodResolvers;
 }
 

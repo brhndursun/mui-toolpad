@@ -3,9 +3,10 @@ import invariant from 'invariant';
 import { createServer, Plugin } from 'vite';
 import { createRpcClient } from '@mui/toolpad-utils/workerRpc';
 import { getHtmlContent, createViteConfig, resolvedComponentsId } from './toolpadAppBuilder';
-import type { RuntimeConfig } from '../config';
+import type { RuntimeConfig } from '../types';
 import type * as appDom from '../appDom';
 import type { ComponentEntry } from './localMode';
+import createRuntimeState from '../runtime/createRuntimeState';
 import { postProcessHtml } from './toolpadAppServer';
 
 export type Command = { kind: 'reload-components' } | { kind: 'exit' };
@@ -41,17 +42,17 @@ function devServerPlugin({ config }: ToolpadAppDevServerParams): Plugin {
       return () => {
         viteServer.middlewares.use('/', async (req, res, next) => {
           invariant(req.url, 'request must have a url');
-          const url = new URL(req.url, 'http://x');
-          const canvas = url.searchParams.get('toolpad-display') === 'canvas';
-
           try {
             const dom = await loadDom();
 
-            const template = getHtmlContent({ canvas });
+            const template = getHtmlContent({ canvas: true });
 
             let html = await viteServer.transformIndexHtml(req.url, template);
 
-            html = postProcessHtml(html, { config, dom });
+            html = postProcessHtml(html, {
+              config,
+              initialState: createRuntimeState({ dom }),
+            });
 
             res.setHeader('content-type', 'text/html; charset=utf-8').end(html);
           } catch (e) {
@@ -108,7 +109,4 @@ export async function main({ port, ...config }: AppViteServerConfig) {
   await notifyReady();
 }
 
-main(workerData).catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main(workerData);

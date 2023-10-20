@@ -1,6 +1,6 @@
 {
   "name": "create-toolpad-app",
-  "version": "0.1.31",
+  "version": "0.1.33",
   "keywords": [
     "react",
     "toolpad",
@@ -30,7 +30,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@mui/toolpad-utils": "0.1.31",
+    "@mui/toolpad-utils": "0.1.33",
     "chalk": "5.3.0",
     "execa": "8.0.1",
     "inquirer": "9.2.11",
@@ -39,11 +39,10 @@
     "yargs": "17.7.2"
   },
   "devDependencies": {
-    "@types/inquirer": "9.0.3",
+    "@types/inquirer": "9.0.4",
     "@types/invariant": "2.2.35",
-    "@types/node": "20.8.0",
+    "@types/node": "20.8.6",
     "@types/semver": "7.5.3",
-    "@types/yargs": "17.0.26"
-  },
-  "gitHead": "0186d8a811d0c172f193d8e961cd763d5024b71a"
+    "@types/yargs": "17.0.28"
+  }
 }

@@ -14,11 +14,12 @@ import {
 } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import { LoadingButton } from '@mui/lab';
-import client from '../api';
+import { useProjectApi } from '../projectApi';
+import { CodeEditorFileType } from '../types';
 
 interface OpenCodeEditorButtonProps extends ButtonProps {
   filePath: string;
-  fileType: string;
+  fileType: CodeEditorFileType;
   onSuccess?: () => void;
   iconButton?: boolean;
 }
@@ -72,17 +73,19 @@ export default function OpenCodeEditorButton({
   fileType,
   iconButton,
   onSuccess,
+  disabled,
   ...rest
 }: OpenCodeEditorButtonProps) {
   const [missingEditorDialog, setMissingEditorDialog] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+  const projectApi = useProjectApi();
 
   const handleClick = React.useCallback(
     async (event: React.SyntheticEvent) => {
       event.stopPropagation();
       setBusy(true);
       try {
-        await client.methods.openCodeEditor(filePath, fileType);
+        await projectApi.methods.openCodeEditor(filePath, fileType);
         onSuccess?.();
       } catch {
         setMissingEditorDialog(true);
@@ -90,14 +93,14 @@ export default function OpenCodeEditorButton({
         setBusy(false);
       }
     },
-    [filePath, fileType, onSuccess],
+    [projectApi, filePath, fileType, onSuccess],
   );
 
   return (
     <React.Fragment>
       {iconButton ? (
         <Tooltip title="Open in code editor">
-          <IconButton disabled={busy} size="small" onClick={handleClick} {...rest}>
+          <IconButton disabled={disabled || busy} size="small" onClick={handleClick} {...rest}>
             {busy ? (
               <CircularProgress color="inherit" size={16} />
             ) : (
@@ -106,7 +109,7 @@ export default function OpenCodeEditorButton({
           </IconButton>
         </Tooltip>
       ) : (
-        <LoadingButton disabled={busy} onClick={handleClick} loading={busy} {...rest}>
+        <LoadingButton disabled={disabled || busy} onClick={handleClick} loading={busy} {...rest}>
           Open
         </LoadingButton>
       )}

@@ -7,6 +7,7 @@ export interface ToolpadComponentDefinition {
   system?: boolean;
   codeComponentId?: NodeId;
   synonyms: string[];
+  initialProps?: Record<string, unknown>;
 }
 
 export type ToolpadComponentDefinitions = Record<string, ToolpadComponentDefinition | undefined>;
@@ -53,10 +54,35 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
       synonyms: ['graph', 'bar chart', 'pie chart', 'line chart', 'plot'],
     },
   ],
-  ['TextField', { displayName: 'Text Field', builtIn: 'TextField', synonyms: ['input', 'field'] }],
+  [
+    'TextField',
+    { displayName: 'Text Field', builtIn: 'TextField', synonyms: ['input', 'field', 'password'] },
+  ],
   ['DatePicker', { displayName: 'Date Picker', builtIn: 'DatePicker', synonyms: ['time'] }],
   ['FilePicker', { displayName: 'File Picker', builtIn: 'FilePicker', synonyms: [] }],
   ['Text', { displayName: 'Text', builtIn: 'Text', synonyms: ['markdown', 'link', 'output'] }],
+  [
+    'Markdown',
+    {
+      displayName: 'Markdown',
+      builtIn: 'Text',
+      initialProps: {
+        mode: 'markdown',
+      },
+      synonyms: [],
+    },
+  ],
+  [
+    'Link',
+    {
+      displayName: 'Link',
+      builtIn: 'Text',
+      initialProps: {
+        mode: 'link',
+      },
+      synonyms: [],
+    },
+  ],
   ['Select', { displayName: 'Select', builtIn: 'Select', synonyms: ['combobox', 'dropdown'] }],
   ['List', { displayName: 'List', builtIn: 'List', synonyms: ['repeat'] }],
   ['Paper', { displayName: 'Paper', builtIn: 'Paper', synonyms: ['surface'] }],
@@ -65,6 +91,15 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
   ['Metric', { displayName: 'Metric', builtIn: 'Metric', synonyms: ['value', 'number', 'output'] }],
   ['Checkbox', { displayName: 'Checkbox', builtIn: 'Checkbox', synonyms: ['switch'] }],
   [FORM_COMPONENT_ID, { displayName: 'Form', builtIn: 'Form', synonyms: [] }],
+  [
+    'Password',
+    {
+      displayName: 'Password',
+      builtIn: 'TextField',
+      synonyms: [],
+      initialProps: { password: true },
+    },
+  ],
 ]);
 
 function createCodeComponent(domNode: appDom.CodeComponentNode): ToolpadComponentDefinition {

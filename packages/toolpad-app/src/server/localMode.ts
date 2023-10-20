@@ -23,7 +23,6 @@ import {
   folderExists,
   readJsonFile,
 } from '@mui/toolpad-utils/fs';
-import getPort from 'get-port';
 import { z } from 'zod';
 import * as appDom from '../appDom';
 import insecureHash from '../utils/insecureHash';
@@ -50,14 +49,18 @@ import {
   ResponseType as AppDomRestResponseType,
 } from '../toolpadDataSources/rest/types';
 import { LocalQuery } from '../toolpadDataSources/local/types';
-import { ProjectEvents, ToolpadProjectOptions } from '../types';
+import type {
+  RuntimeConfig,
+  ProjectEvents,
+  ToolpadProjectOptions,
+  CodeEditorFileType,
+} from '../types';
 import { Awaitable } from '../utils/types';
 import EnvManager from './EnvManager';
-import FunctionsManager from './FunctionsManager';
+import FunctionsManager, { CreateDataProviderOptions } from './FunctionsManager';
 import { VersionInfo, checkVersion } from './versionInfo';
 import { VERSION_CHECK_INTERVAL } from '../constants';
 import DataManager from './DataManager';
-import type { RuntimeConfig } from '../config';
 import { PAGE_COLUMN_COMPONENT_ID, PAGE_ROW_COMPONENT_ID } from '../runtime/toolpadComponents';
 
 invariant(
@@ -362,18 +365,12 @@ function expandChildren<N extends appDom.AppDomNode>(
   dom: appDom.AppDom,
 ): (Query | ElementType)[];
 function expandChildren<N extends appDom.AppDomNode>(children: N[], dom: appDom.AppDom) {
-  return (
-    children
-      .sort((child1, child2) => {
-        invariant(
-          child1.parentIndex && child2.parentIndex,
-          'Nodes are not children of another node',
-        );
-        return appDom.compareFractionalIndex(child1.parentIndex, child2.parentIndex);
-      })
-      // eslint-disable-next-line @typescript-eslint/no-use-before-define
-      .map((child) => expandFromDom(child, dom))
-  );
+  return children
+    .sort((child1, child2) => {
+      invariant(child1.parentIndex && child2.parentIndex, 'Nodes are not children of another node');
+      return appDom.compareFractionalIndex(child1.parentIndex, child2.parentIndex);
+    })
+    .map((child) => expandFromDom(child, dom));
 }
 
 function undefinedWhenEmpty<O extends object | any[]>(obj?: O): O | undefined {
@@ -1031,8 +1028,8 @@ class ToolpadProject {
             loadDomFromDisk(this.root),
             calculateDomFingerprint(this.root),
           ]);
-          this.events.emit('change', { fingerprint });
-          this.events.emit('externalChange', { fingerprint });
+          this.events.emit('change', {});
+          this.events.emit('externalChange', {});
 
           const newCodeComponentsFingerprint = getCodeComponentsFingerprint(dom);
           if (this.codeComponentsFingerprint !== newCodeComponentsFingerprint) {
@@ -1157,29 +1154,28 @@ class ToolpadProject {
     const newFingerprint = await calculateDomFingerprint(this.root);
     this.domAndFingerprint = [newDom, newFingerprint];
     this.events.emit('change', { fingerprint: newFingerprint });
-    return { fingerprint: newFingerprint };
   }
 
   async saveDom(newDom: appDom.AppDom) {
-    return this.domAndFingerprintLock.use(async () => {
+    await this.domAndFingerprintLock.use(async () => {
       return this.writeDomToDisk(newDom);
     });
   }
 
   async applyDomDiff(domDiff: appDom.DomDiff) {
-    return this.domAndFingerprintLock.use(async () => {
+    await this.domAndFingerprintLock.use(async () => {
       const dom = await this.loadDom();
       const newDom = appDom.applyDiff(dom, domDiff);
       return this.writeDomToDisk(newDom);
     });
   }
 
-  async openCodeEditor(fileName: string, fileType: string) {
+  async openCodeEditor(fileName: string, fileType: CodeEditorFileType) {
     const supportedEditor = await findSupportedEditor();
     const root = this.getRoot();
     let resolvedPath = fileName;
 
-    if (fileType === 'query') {
+    if (fileType === 'resource') {
       resolvedPath = await this.functionsManager.getFunctionFilePath(fileName);
     }
     if (fileType === 'component') {
@@ -1209,6 +1205,10 @@ class ToolpadProject {
     await writeFileRecursive(filePath, content, { encoding: 'utf-8' });
   }
 
+  async createDataProvider(name: string, options: CreateDataProviderOptions) {
+    return this.functionsManager.createDataProviderFile(name, options);
+  }
+
   async deletePage(name: string) {
     const pageFolder = getPageFolder(this.root, name);
     await fs.rm(pageFolder, { force: true, recursive: true });
@@ -1220,18 +1220,14 @@ class ToolpadProject {
     return config;
   }
 
-  getRuntimeConfig(): RuntimeConfig {
+  async getRuntimeConfig(): Promise<RuntimeConfig> {
     // When these fail, you are likely trying to retrieve this information during the
     // toolpad build. It's fundamentally wrong to use this information as it strictly holds
     // information about the running toolpad instance.
     invariant(this.options.externalUrl, 'External URL is not set');
-    invariant(this.options.base, 'Base path is not set');
 
     return {
       externalUrl: this.options.externalUrl,
-      projectDir: this.getRoot(),
-      wsPort: this.options.wsPort,
-      base: this.options.base,
     };
   }
 
@@ -1292,10 +1288,6 @@ export async function initProject({ dir: dirInput, ...config }: InitProjectOptio
     customServer: false,
     ...config,
   };
-
-  if (resolvedConfig.dev && !resolvedConfig.wsPort) {
-    resolvedConfig.wsPort = await getPort();
-  }
 
   await migrateLegacyProject(dir);
 
