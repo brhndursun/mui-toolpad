@@ -4,7 +4,7 @@ spec:
   id: VL1vLQx
   title: Page2
   display: standalone
-  layout: container
+  layout: fluid
   slug: [profile, profile-:id, profile-:id/:action]
   content:
     - component: Text
@@ -12,7 +12,5 @@ spec:
       props:
         value: PAGE2
   parameters:
-    - name: a
-      value: a1
-    - name: b
-      value: b1
+    - name: d
+      value: a

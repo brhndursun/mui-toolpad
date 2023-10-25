@@ -238,7 +238,9 @@ export default function PagesExplorer({ className }: PagesExplorerProps) {
         name: newPageName,
         attributes: {
           title: newPageName,
-          display: 'shell',
+          slug: [newPageName],
+          layout: 'container',
+          display: 'standalone',
         },
       });
       const appNode = appDom.getApp(dom);

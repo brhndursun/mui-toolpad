@@ -1,4 +1,4 @@
-import { MenuItem, TextField } from '@mui/material';
+import { MenuItem, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import * as React from 'react';
 import { AppDom, PageLayoutMode, PageNode, setNodeNamespacedProp } from '../../appDom';
 import { useDomApi } from '../AppState';
@@ -17,37 +17,34 @@ export default function PageLayoutEditor({ node }: PageLayoutEditorProps) {
   const [pageLayoutInput, setpageLayoutInput] = React.useState(node.attributes.layout);
 
   const handlePageLayoutChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setpageLayoutInput(event.target.value as PageLayoutMode);
+    (event: React.MouseEvent<HTMLElement>, newValue: PageLayoutMode) => {
+      setpageLayoutInput(newValue);
       domApi.update((appDom: AppDom) =>
-        setNodeNamespacedProp(
-          appDom,
-          node,
-          'attributes',
-          'layout',
-          event.target.value as PageLayoutMode,
-        ),
+        setNodeNamespacedProp(appDom, node, 'attributes', 'layout', newValue),
       );
     },
     [domApi, node],
   );
 
   return (
-    <TextField
-      select
-      defaultValue="container"
-      value={pageLayoutInput}
-      onChange={handlePageLayoutChange}
-      label="Page Layout"
-      fullWidth
-    >
-      {PAGE_LAYOUT_OPTIONS.map((option) => {
-        return (
-          <MenuItem key={option.value} value={option.value}>
-            {option.label}
-          </MenuItem>
-        );
-      })}
-    </TextField>
+    <React.Fragment>
+      <Typography variant="body2">Page Layout:</Typography>
+      <ToggleButtonGroup
+        exclusive
+        defaultValue={'container'}
+        value={pageLayoutInput ?? 'container'}
+        onChange={handlePageLayoutChange}
+        aria-label="Page Layout"
+        fullWidth
+      >
+        {PAGE_LAYOUT_OPTIONS.map((option) => {
+          return (
+            <ToggleButton key={option.value} value={option.value}>
+              {option.label}
+            </ToggleButton>
+          );
+        })}
+      </ToggleButtonGroup>
+    </React.Fragment>
   );
 }

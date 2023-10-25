@@ -52,7 +52,7 @@ const navigationActionSchema = z
   .object({
     $$navigationAction: z.object({
       page: z.string().describe('The page that is being navigated to'),
-      slug: z.string().describe('The page that is being navigated to with this slug'),
+      pageSlug: z.string().describe('The page that is being navigated to with this slug'),
       parameters: z
         .record(bindableSchema(z.any()))
         .describe('Parameters to pass when navigating to this page'),

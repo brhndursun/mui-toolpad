@@ -4,7 +4,7 @@ spec:
   id: T7t5AlB
   title: page
   display: standalone
-  layout: fluid
+  layout: container
   slug:
     - page
   content:
@@ -14,14 +14,11 @@ spec:
         onClick:
           $$navigationAction:
             page: VL1vLQx
-            slug: profile-:id/:action
-            pageSlug: profile-:id/:action
-            parameters:
-              a: a1
-              b: b1
+            pageSlug: profile
+            parameters: {}
             slugParameters:
-              '0': profile
-              '1': profile-:id
-              '2': profile-:id/:action
-              id: '123'
-              action: asd
+              id:
+                $$jsExpression: ''
+              action:
+                $$jsExpression: |
+                  'asd'

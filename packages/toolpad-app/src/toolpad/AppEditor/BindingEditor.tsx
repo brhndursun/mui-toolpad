@@ -371,7 +371,14 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
     const extractParams = (input: string) => {
       return input.match(/:([^/]+)(?=(\/|$))/g)?.map((match) => match.slice(1));
     };
-    return [...new Set(params.map(extractParams).flat())].filter(Boolean);
+    return params
+      .map(extractParams)
+      .flat()
+      .filter(Boolean)
+      .reduce((obj: { [key: string]: string }, item: string) => {
+        obj[item] = '';
+        return obj;
+      }, {});
   }, []);
 
   const handlePageChange = React.useCallback(
@@ -381,15 +388,18 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
       const pageSlugId = page.attributes.slug[0];
 
       const defaultActionParameters = appDom.isPage(page) ? getDefaultActionParameters(page) : {};
+      const defaultActionSlugs = appDom.isPage(page) ? getDefaultPageSlugParameters(page) : {};
+
       onChange({
         $$navigationAction: {
           page: pageId,
           pageSlug: pageSlugId,
+          slugParameters: defaultActionSlugs,
           parameters: defaultActionParameters,
         },
       });
     },
-    [dom, getDefaultActionParameters, onChange],
+    [dom, getDefaultActionParameters, getDefaultPageSlugParameters, onChange],
   );
 
   const handlePageSlugChange = React.useCallback(

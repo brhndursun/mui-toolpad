@@ -47,7 +47,7 @@ export function getBindingValue<V>(binding: BindableAttrValue<V>):
     if (hasOwnProperty(binding, '$$navigationAction')) {
       return binding.$$navigationAction as {
         page: string;
-        slug: string;
+        pageSlug: string;
         parameters?: Record<string, unknown>;
         slugParameters?: Record<string, unknown>;
       };

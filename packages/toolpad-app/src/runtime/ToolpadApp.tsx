@@ -1052,7 +1052,13 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
       if (action?.$$navigationAction) {
         const handler = async () => {
-          const { page, parameters = {} } = action.$$navigationAction;
+          const {
+            page,
+            parameters = {},
+            pageSlug,
+            slugParameters = {},
+          } = action.$$navigationAction;
+
           if (page) {
             const parsedParameterEntries = await Promise.all(
               Object.keys(parameters).map(async (parameterName) => {
@@ -1066,9 +1072,34 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
               }),
             );
 
-            const parsedParameters = Object.fromEntries(parsedParameterEntries);
+            const parsedSlugEntries = await Promise.all(
+              Object.keys(slugParameters).map(async (parameterName) => {
+                const parameterValue = slugParameters[parameterName];
 
-            navigateToPage(page, parsedParameters);
+                if (parameterValue?.$$jsExpression) {
+                  const result = await evaluateScopeExpression(parameterValue.$$jsExpression);
+                  return [parameterName, result.value];
+                }
+                return [parameterName, parameterValue];
+              }),
+            );
+
+            const parsedParameters = Object.fromEntries(parsedParameterEntries);
+            const parsedSlugs = Object.fromEntries(parsedSlugEntries);
+
+            if (isRenderedInCanvas) {
+              navigateToPage(page, parsedParameters);
+            } else {
+              const pattern = /:([a-zA-Z]+)/g;
+              const outputURL = pageSlug.replace(pattern, (match: string, placeholder: string) => {
+                if (parsedSlugs.hasOwnProperty(placeholder)) {
+                  return parsedSlugs[placeholder];
+                }
+
+                return match;
+              });
+              navigateToPage(outputURL, parsedParameters);
+            }
           }
         };
 
