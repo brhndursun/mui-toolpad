@@ -4,30 +4,30 @@ import {
   Button,
   capitalize,
   createTheme,
-  PaletteMode,
+  // PaletteMode,
   Popover,
   SimplePaletteColorOptions,
   Stack,
-  styled,
+  // styled,
   ThemeOptions,
-  ToggleButton,
-  ToggleButtonGroup,
+  // ToggleButton,
+  // ToggleButtonGroup,
   useTheme,
 } from '@mui/material';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
+// import LightModeIcon from '@mui/icons-material/LightMode';
+// import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { WithControlledProp } from '../utils/types';
 import ColorTool from './ColorTool';
 import FlexFill from './FlexFill';
 
-const IconToggleButton = styled(ToggleButton)({
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%',
-  '& > *': {
-    marginRight: '8px',
-  },
-});
+// const IconToggleButton = styled(ToggleButton)({
+//   display: 'flex',
+//   justifyContent: 'center',
+//   width: '100%',
+//   '& > *': {
+//     marginRight: '8px',
+//   },
+// });
 
 interface PaletteColorPickerProps extends WithControlledProp<string | undefined> {
   label: string;

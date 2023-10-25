@@ -359,16 +359,18 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
 
   const getDefaultActionParameters = React.useCallback((page: appDom.PageNode) => {
     const defaultPageParameters = page.attributes.parameters || [];
-    console.log(page);
     return Object.fromEntries(defaultPageParameters);
   }, []);
 
   const getDefaultPageSlugs = React.useCallback((page: appDom.PageNode) => {
+    const defaultPageSlugs = page.attributes.slug || [];
+    return defaultPageSlugs;
+  }, []);
+  const getDefaultPageSlugParameters = React.useCallback((page: appDom.PageNode) => {
     const params = page.attributes.slug;
     const extractParams = (input: string) => {
       return input.match(/:([^/]+)(?=(\/|$))/g)?.map((match) => match.slice(1));
     };
-
     return [...new Set(params.map(extractParams).flat())].filter(Boolean);
   }, []);
 
@@ -397,7 +399,7 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
       const page = appDom.getNode(dom, pageId);
 
       const defaultActionParameters = appDom.isPage(page) ? getDefaultActionParameters(page) : {};
-      const defaultActionSlugs = appDom.isPage(page) ? getDefaultPageSlugs(page) : {};
+      const defaultActionSlugs = appDom.isPage(page) ? getDefaultPageSlugParameters(page) : {};
 
       onChange({
         $$navigationAction: {
@@ -408,7 +410,7 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
         },
       });
     },
-    [dom, getDefaultActionParameters, getDefaultPageSlugs, onChange, pages],
+    [dom, getDefaultActionParameters, getDefaultPageSlugParameters, onChange, pages],
   );
   const actionPageId = value?.$$navigationAction?.page || null;
   const actionPageSlug = value?.$$navigationAction?.pageSlug || null;

@@ -5,4 +5,14 @@ spec:
   title: Page2
   display: standalone
   layout: container
-  slug: [page2, page2:id]
+  slug: [profile, profile-:id, profile-:id/:action]
+  content:
+    - component: Text
+      name: text
+      props:
+        value: PAGE2
+  parameters:
+    - name: a
+      value: a1
+    - name: b
+      value: b1

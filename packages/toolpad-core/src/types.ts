@@ -30,6 +30,7 @@ export interface NavigationAction<P = any> {
   $$navigationAction: {
     page: string;
     slug: string;
+    pageSlug: string;
     parameters?: BindableAttrValues<P>;
     slugParameters?: BindableAttrValues<P>;
   };
