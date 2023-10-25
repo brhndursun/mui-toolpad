@@ -7,6 +7,7 @@ export interface ToolpadComponentDefinition {
   system?: boolean;
   codeComponentId?: NodeId;
   synonyms: string[];
+  group: string;
   initialProps?: Record<string, unknown>;
 }
 
@@ -22,18 +23,21 @@ export const STACK_COMPONENT_ID = 'Stack';
 export const FORM_COMPONENT_ID = 'Form';
 
 export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
-  [PAGE_ROW_COMPONENT_ID, { displayName: 'Row', builtIn: 'PageRow', system: true, synonyms: [] }],
+  [
+    PAGE_ROW_COMPONENT_ID,
+    { displayName: 'Row', builtIn: 'PageRow', system: true, synonyms: [], group: 'layout' },
+  ],
   [
     PAGE_COLUMN_COMPONENT_ID,
-    { displayName: 'Column', builtIn: 'PageColumn', system: true, synonyms: [] },
+    { displayName: 'Column', builtIn: 'PageColumn', system: true, synonyms: [], group: 'layout' },
   ],
-  [STACK_COMPONENT_ID, { displayName: 'Stack', builtIn: 'Stack', system: true, synonyms: [] }],
   [
     'Autocomplete',
     {
       displayName: 'Autocomplete',
       builtIn: 'Autocomplete',
       synonyms: ['combobox', 'select', 'dropdown'],
+      group: 'inputs',
     },
   ],
   [
@@ -42,25 +46,58 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
       displayName: 'Button',
       builtIn: 'Button',
       synonyms: ['click', 'action'],
+      group: 'inputs',
     },
   ],
-  ['Image', { displayName: 'Image', builtIn: 'Image', synonyms: ['picture'] }],
-  ['DataGrid', { displayName: 'Data Grid', builtIn: 'DataGrid', synonyms: ['table'] }],
+  [
+    'ButtonGroup',
+    {
+      displayName: 'Button Group',
+      builtIn: 'ButtonGroup',
+      synonyms: ['click', 'action'],
+      group: 'inputs',
+    },
+  ],
+  ['Image', { displayName: 'Image', builtIn: 'Image', synonyms: ['picture'], group: 'display' }],
+  [
+    'DataGrid',
+    { displayName: 'Data Grid', builtIn: 'DataGrid', synonyms: ['table'], group: 'display' },
+  ],
   [
     'Chart',
     {
       displayName: 'Chart',
       builtIn: 'Chart',
       synonyms: ['graph', 'bar chart', 'pie chart', 'line chart', 'plot'],
+      group: 'display',
     },
   ],
   [
     'TextField',
-    { displayName: 'Text Field', builtIn: 'TextField', synonyms: ['input', 'field', 'password'] },
+    {
+      displayName: 'Text Field',
+      builtIn: 'TextField',
+      synonyms: ['input', 'field', 'password'],
+      group: 'inputs',
+    },
   ],
-  ['DatePicker', { displayName: 'Date Picker', builtIn: 'DatePicker', synonyms: ['time'] }],
-  ['FilePicker', { displayName: 'File Picker', builtIn: 'FilePicker', synonyms: [] }],
-  ['Text', { displayName: 'Text', builtIn: 'Text', synonyms: ['markdown', 'link', 'output'] }],
+  [
+    'DatePicker',
+    { displayName: 'Date Picker', builtIn: 'DatePicker', synonyms: ['time'], group: 'inputs' },
+  ],
+  [
+    'FilePicker',
+    { displayName: 'File Picker', builtIn: 'FilePicker', synonyms: [], group: 'inputs' },
+  ],
+  [
+    'Text',
+    {
+      displayName: 'Text',
+      builtIn: 'Text',
+      synonyms: ['markdown', 'link', 'output'],
+      group: 'display',
+    },
+  ],
   [
     'Markdown',
     {
@@ -70,6 +107,7 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
         mode: 'markdown',
       },
       synonyms: [],
+      group: 'display',
     },
   ],
   [
@@ -81,16 +119,18 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
         mode: 'link',
       },
       synonyms: [],
+      group: 'display',
     },
   ],
-  ['Select', { displayName: 'Select', builtIn: 'Select', synonyms: ['combobox', 'dropdown'] }],
-  ['List', { displayName: 'List', builtIn: 'List', synonyms: ['repeat'] }],
-  ['Paper', { displayName: 'Paper', builtIn: 'Paper', synonyms: ['surface'] }],
-  ['Tabs', { displayName: 'Tabs', builtIn: 'Tabs', synonyms: [] }],
-  ['Container', { displayName: 'Container', builtIn: 'Container', synonyms: [] }],
-  ['Metric', { displayName: 'Metric', builtIn: 'Metric', synonyms: ['value', 'number', 'output'] }],
-  ['Checkbox', { displayName: 'Checkbox', builtIn: 'Checkbox', synonyms: ['switch'] }],
-  [FORM_COMPONENT_ID, { displayName: 'Form', builtIn: 'Form', synonyms: [] }],
+  [
+    'Metric',
+    {
+      displayName: 'Metric',
+      builtIn: 'Metric',
+      synonyms: ['value', 'number', 'output'],
+      group: 'inputs',
+    },
+  ],
   [
     'Password',
     {
@@ -98,8 +138,33 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
       builtIn: 'TextField',
       synonyms: [],
       initialProps: { password: true },
+      group: 'inputs',
     },
   ],
+  [
+    'Select',
+    {
+      displayName: 'Select',
+      builtIn: 'Select',
+      synonyms: ['combobox', 'dropdown'],
+      group: 'inputs',
+    },
+  ],
+  ['List', { displayName: 'List', builtIn: 'List', synonyms: ['repeat'], group: 'layout' }],
+  ['Paper', { displayName: 'Paper', builtIn: 'Paper', synonyms: ['surface'], group: 'layout' }],
+  ['Stack', { displayName: 'Stack', builtIn: 'Stack', synonyms: ['surface'], group: 'layout' }],
+  ['Tabs', { displayName: 'Tabs', builtIn: 'Tabs', synonyms: [], group: 'navigation' }],
+  ['Container', { displayName: 'Container', builtIn: 'Container', synonyms: [], group: 'layout' }],
+  [
+    'Checkbox',
+    { displayName: 'Checkbox', builtIn: 'Checkbox', synonyms: ['switch'], group: 'inputs' },
+  ],
+  ['Rating', { displayName: 'Rating', builtIn: 'Rating', synonyms: ['switch'], group: 'inputs' }],
+  [
+    'RadioGroup',
+    { displayName: 'Radio', builtIn: 'RadioGroup', synonyms: ['switch'], group: 'inputs' },
+  ],
+  [FORM_COMPONENT_ID, { displayName: 'Form', builtIn: 'Form', synonyms: [], group: 'layout' }],
 ]);
 
 function createCodeComponent(domNode: appDom.CodeComponentNode): ToolpadComponentDefinition {
@@ -107,6 +172,7 @@ function createCodeComponent(domNode: appDom.CodeComponentNode): ToolpadComponen
     displayName: domNode.name,
     codeComponentId: domNode.id,
     synonyms: [],
+    group: '',
   };
 }
 

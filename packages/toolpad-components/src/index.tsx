@@ -10,6 +10,8 @@ export { default as Text } from './Text';
 
 export { default as Button } from './Button';
 
+export { default as ButtonGroup } from './ButtonGroup';
+
 export { default as DataGrid } from './DataGrid';
 
 export { default as Chart } from './Chart';
@@ -33,6 +35,10 @@ export { default as Tabs } from './Tabs';
 export { default as Container } from './Container';
 
 export { default as Checkbox } from './Checkbox';
+
+export { default as RadioGroup } from './RadioGroup';
+
+export { default as Rating } from './Rating';
 
 export { default as Form } from './Form';
 

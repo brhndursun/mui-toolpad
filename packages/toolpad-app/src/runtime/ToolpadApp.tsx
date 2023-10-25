@@ -3,7 +3,6 @@ import {
   Stack,
   CssBaseline,
   Alert,
-  Box,
   styled,
   AlertTitle,
   LinearProgress,
@@ -33,6 +32,7 @@ import {
   ApplicationVm,
   JsExpressionAttrValue,
   ComponentConfig,
+  RUNTIME_PROP_SLOTS,
 } from '@mui/toolpad-core';
 import { createProvidedContext, useAssertedContext } from '@mui/toolpad-utils/react';
 import { mapProperties, mapValues } from '@mui/toolpad-utils/collections';
@@ -47,6 +47,9 @@ import {
   Location as RouterLocation,
   useNavigate,
   useMatch,
+  useMatches,
+  useParams,
+  matchRoutes,
 } from 'react-router-dom';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import {
@@ -64,6 +67,7 @@ import useBoolean from '@mui/toolpad-utils/hooks/useBoolean';
 import usePageTitle from '@mui/toolpad-utils/hooks/usePageTitle';
 import invariant from 'invariant';
 import useEventCallback from '@mui/utils/useEventCallback';
+import { Box } from '@mui/system';
 import * as appDom from '../appDom';
 import { RuntimeState } from '../types';
 import { getBindingType, getBindingValue } from '../bindings';
@@ -88,6 +92,7 @@ import PreviewHeader from './PreviewHeader';
 import { AppLayout } from './AppLayout';
 import { useDataProvider } from './useDataProvider';
 import api, { queryClient } from './api';
+import { findPath } from '../utils/matchPath';
 
 const browserJsRuntime = getBrowserRuntime();
 
@@ -150,7 +155,7 @@ function usePageNavigator(): NavigateToPage {
         canvasEvents.emit('pageNavigationRequest', { pageNodeId });
       } else {
         navigate({
-          pathname: `/pages/${pageNodeId}`,
+          pathname: `/${pageNodeId}`,
           ...(urlParams
             ? {
                 search: urlParams.toString(),
@@ -386,6 +391,21 @@ function parseBinding(
     scopePath,
     result: { value: undefined },
   };
+}
+function clearFirstSlash(path: string) {
+  return path.charAt(0) === '/' ? path.replace(/^./, '') : path;
+}
+function matchPath(pathname: string, route: string) {
+  const regex = new RegExp(`^${route.replace(/\//g, '\\/').replace(/:\w+/g, '([^/]+)')}$`);
+  const match = pathname.match(regex);
+  const params: { [key: string]: string } = {};
+  const keys = route.match(/:(\w+)/g);
+  if (keys) {
+    keys.forEach((key, index) => {
+      params[key.slice(1)] = match ? match[index + 1] : '';
+    });
+  }
+  return params;
 }
 
 /**
@@ -626,6 +646,38 @@ function parseBindings(
           result: { value: urlParams.get(paramName) || paramDefault },
         });
       }
+      parsedBindingsMap.set(`${rootNode.id}.parameters.slug`, {
+        scopePath: `page.parameters.slug`,
+        result: { value: rootNode.attributes.slug },
+      });
+
+      const pageParams: { [key: string]: string } = {};
+      rootNode.attributes.slug?.forEach((path) => {
+        const pathParams = matchPath(clearFirstSlash(location.pathname), clearFirstSlash(path));
+        if (!pathParams) {
+          return;
+        }
+        Object.entries(pathParams).forEach(([key, value]) => {
+          if (Object.keys(pageParams).indexOf(key) < 0) {
+            pageParams[key] = value;
+          } else if (!pageParams[key]) {
+            pageParams[key] = value;
+          }
+        });
+      });
+      parsedBindingsMap.set(`${rootNode.id}.parameters.pageParams`, {
+        scopePath: `page.parameters.pageParams`,
+        result: { value: pageParams },
+      });
+
+      parsedBindingsMap.set(`${rootNode.id}.parameters.location`, {
+        scopePath: `page.parameters.location`,
+        result: { value: location },
+      });
+      parsedBindingsMap.set(`${rootNode.id}.parameters.location`, {
+        scopePath: `page.parameters.location`,
+        result: { value: location },
+      });
     }
   }
 
@@ -887,6 +939,12 @@ function NodeError({ error }: NodeErrorProps) {
   );
 }
 
+const StyledInvisibleContent = styled(Typography)(({ theme }) => ({
+  textAlign: 'center',
+  color: theme.palette.primary.main,
+  padding: '5px',
+  border: `2px dotted ${theme.palette.primary.main}`,
+}));
 interface RenderedNodeContentProps {
   node: appDom.PageNode | appDom.ElementNode;
   childNodeGroups: appDom.NodeChildren<appDom.ElementNode>;
@@ -961,24 +1019,6 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
     return hookResult;
   }, [argTypes, errorProp, errorPropSource, liveBindings, loadingProp, loadingPropSource, nodeId]);
-
-  const boundLayoutProps: Record<string, any> = React.useMemo(() => {
-    const hookResult: Record<string, any> = {};
-
-    for (const [propName, argType] of isLayoutNode ? [] : Object.entries(layoutBoxArgTypes)) {
-      const bindingId = `${nodeId}.layout.${propName}`;
-      const binding = liveBindings[bindingId];
-      if (binding) {
-        hookResult[propName] = binding.value;
-      }
-
-      if (typeof hookResult[propName] === 'undefined' && argType) {
-        hookResult[propName] = getArgTypeDefaultValue(argType);
-      }
-    }
-
-    return hookResult;
-  }, [isLayoutNode, liveBindings, nodeId]);
 
   const onChangeHandlers: Record<string, (param: any) => void> = React.useMemo(
     () =>
@@ -1111,13 +1151,30 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
         let wrappedValue = value;
         if (argType.control?.type === 'slots' || argType.control?.type === 'layoutSlot') {
-          wrappedValue = (
-            <Slots prop={propName} hasLayout={argType.control?.type === 'layoutSlot'}>
-              {value}
-            </Slots>
-          );
+          wrappedValue = <Slots prop={propName}>{value}</Slots>;
         } else if (argType.control?.type === 'slot') {
           wrappedValue = <Placeholder prop={propName}>{value}</Placeholder>;
+        } else if (argType.control?.type === 'buttons') {
+          if (React.Children.count(value) === 0) {
+            wrappedValue = <Slots prop={propName}>{value}</Slots>;
+          } else {
+            // hookResult.parentId = nodeId;
+            // hookResult[RUNTIME_PROP_SLOTS] = propName;
+            // console.log(value);
+            wrappedValue = React.Children.map(value, (child) => (
+              <React.Fragment {...{ [RUNTIME_PROP_SLOTS]: propName, parentID: nodeId }}>
+                {React.cloneElement(child, { parentId: nodeId, [RUNTIME_PROP_SLOTS]: propName })}
+              </React.Fragment>
+            ));
+
+            // wrappedValue = <Slots prop={propName}>{value}</Slots>;
+
+            // wrappedValue = (
+            //   <React.Fragment parentId={nodeId} {...{ [RUNTIME_PROP_SLOTS]: propName }}>
+            //     {value}
+            //   </React.Fragment>
+            // );
+          }
         }
 
         if (isTemplate) {
@@ -1140,7 +1197,14 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
       }
     }
     return hookResult;
-  }, [argTypes, node, props]);
+  }, [argTypes, node, props, nodeId]);
+
+  const invisible = React.useMemo(() => {
+    if (wrappedProps.visible === false) {
+      return true;
+    }
+    return false;
+  }, [wrappedProps]);
 
   const vmRef = React.useContext(ApplicationVmApiContext);
   React.useEffect(() => {
@@ -1157,6 +1221,25 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
     };
   }, [nodeId, argTypes, vmRef, scope]);
 
+  if (isRenderedInCanvas) {
+    return (
+      <NodeRuntimeWrapper
+        nodeId={nodeId}
+        nodeName={node.name}
+        componentConfig={Component[TOOLPAD_COMPONENT]}
+        NodeError={NodeError}
+      >
+        {invisible ? (
+          <StyledInvisibleContent {...wrappedProps} variant={'subtitle2'}>
+            <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+          </StyledInvisibleContent>
+        ) : (
+          <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+        )}
+      </NodeRuntimeWrapper>
+    );
+  }
+
   return (
     <NodeRuntimeWrapper
       nodeId={nodeId}
@@ -1164,29 +1247,26 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
       componentConfig={Component[TOOLPAD_COMPONENT]}
       NodeError={NodeError}
     >
-      {isLayoutNode ? (
-        <Component {...wrappedProps} />
-      ) : (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: boundLayoutProps.verticalAlign,
-            justifyContent: boundLayoutProps.horizontalAlign,
-          }}
-        >
-          <Component {...wrappedProps} />
-        </Box>
-      )}
+      <React.Fragment>
+        {!invisible && (
+          <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+        )}
+      </React.Fragment>
     </NodeRuntimeWrapper>
   );
 }
 
 interface PageRootProps {
   children?: React.ReactNode;
+  attributes: {
+    layout: appDom.PageLayoutMode;
+  };
 }
 
-function PageRoot({ children }: PageRootProps) {
-  return (
+function PageRoot({ children, attributes }: PageRootProps) {
+  const { layout } = attributes;
+  const isContainer = layout !== ('fluid' as appDom.PageLayoutMode);
+  return isContainer ? (
     <Container>
       <Stack
         data-testid="page-root"
@@ -1199,6 +1279,18 @@ function PageRoot({ children }: PageRootProps) {
         {children}
       </Stack>
     </Container>
+  ) : (
+    <Stack
+      data-testid="page-root"
+      direction="column"
+      sx={{
+        flex: 1,
+        gap: 1,
+        ...(isRenderedInCanvas ? { px: 3 } : {}),
+      }}
+    >
+      {children}
+    </Stack>
   );
 }
 
@@ -1421,13 +1513,13 @@ interface RenderedPagesProps {
 function RenderedPages({ pages }: RenderedPagesProps) {
   const defaultPage = pages[0];
 
-  const defaultPageNavigation = <Navigate to={`/pages/${defaultPage.id}`} replace />;
+  const defaultPageNavigation = <Navigate to={`/${defaultPage.id}`} replace />;
   return (
     <Routes>
       {pages.map((page) => (
         <React.Fragment key={page.id}>
           <Route
-            path={`/pages/${page.id}`}
+            path={`/${page.id}`}
             element={
               <RenderedPage
                 nodeId={page.id}
@@ -1441,13 +1533,21 @@ function RenderedPages({ pages }: RenderedPagesProps) {
       ))}
       {pages.map((page) => (
         <React.Fragment key={page.id}>
-          <Route
-            path={`/pages/${page.name}`}
-            element={<Navigate to={`/pages/${page.id}`} replace />}
-          />
+          {page.attributes.slug?.map((path) => (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={<RenderedPage nodeId={page.id} key={page.id} />}
+            />
+          ))}
         </React.Fragment>
       ))}
-      <Route path="/pages" element={defaultPageNavigation} />
+      {pages.map((page) => (
+        <React.Fragment key={page.id}>
+          <Route path={`/${page.name}`} element={<Navigate to={`/${page.id}`} replace />} />
+        </React.Fragment>
+      ))}
+      {/* <Route path="/pages" element={defaultPageNavigation} /> */}
       <Route path="/" element={defaultPageNavigation} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -1486,8 +1586,22 @@ function ToolpadAppLayout({ dom }: ToolpadAppLayoutProps) {
   const root = appDom.getApp(dom);
   const { pages = [] } = appDom.getChildNodes(dom, root);
 
-  const pageMatch = useMatch('/pages/:slug');
-  const pageId = pageMatch?.params.slug;
+  const location = useLocation();
+
+  const pageMatch = useMatch('/:slug');
+
+  const pageId: string | undefined = React.useMemo(() => {
+    const slugs = ([] as string[])
+      .concat(...pages.map((page) => page.attributes.slug))
+      .map((route) => ({ path: route }));
+    const [{ route }] = matchRoutes(slugs, location) ?? [{}];
+    if (!route?.path) {
+      return pageMatch?.params.slug;
+    }
+    return pages.find((page) => {
+      return page.attributes.slug.includes(route.path);
+    })?.id;
+  }, [location, pages, pageMatch]);
 
   const showPreviewHeader = isPreview && !isRenderedInCanvas && !isCustomServer;
 
@@ -1495,6 +1609,7 @@ function ToolpadAppLayout({ dom }: ToolpadAppLayoutProps) {
     () =>
       pages.map((page) => ({
         slug: page.id,
+        slugs: page.attributes.slug,
         displayName: page.name,
         hasShell: page?.attributes.display !== 'standalone',
       })),

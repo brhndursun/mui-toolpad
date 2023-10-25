@@ -1,22 +1,20 @@
+import { hasOwnProperty } from '@mui/toolpad-utils/collections';
+import { Emitter } from '@mui/toolpad-utils/events';
+import { createProvidedContext } from '@mui/toolpad-utils/react';
 import * as React from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import { Emitter } from '@mui/toolpad-utils/events';
 import * as ReactIs from 'react-is';
-import { hasOwnProperty } from '@mui/toolpad-utils/collections';
-import { createProvidedContext } from '@mui/toolpad-utils/react';
-import { Stack } from '@mui/material';
-import { RuntimeEvents, ToolpadComponents, ToolpadComponent, ArgTypeDefinition } from './types';
+import { createComponent } from './browser';
 import { RUNTIME_PROP_NODE_ID, RUNTIME_PROP_SLOTS, TOOLPAD_COMPONENT } from './constants';
 import type {
-  SlotType,
   ComponentConfig,
-  RuntimeEvent,
-  RuntimeError,
-  PaginationMode,
-  ToolpadDataProviderBase,
   NodeId,
+  PaginationMode,
+  RuntimeError,
+  RuntimeEvent,
+  ToolpadDataProviderBase,
 } from './types';
-import { createComponent } from './browser';
+import { ArgTypeDefinition, RuntimeEvents, ToolpadComponent, ToolpadComponents } from './types';
 
 const ResetNodeErrorsKeyContext = React.createContext(0);
 
@@ -47,25 +45,11 @@ interface SlotsWrapperProps {
   children?: React.ReactNode;
   // eslint-disable-next-line react/no-unused-prop-types
   [RUNTIME_PROP_SLOTS]: string;
-  slotType: SlotType;
   // eslint-disable-next-line react/no-unused-prop-types
   parentId: string;
 }
 
-function SlotsWrapper({ children, slotType }: SlotsWrapperProps) {
-  if (slotType === 'layout') {
-    return (
-      <Stack
-        direction="column"
-        sx={{
-          gap: 1,
-        }}
-      >
-        {children}
-      </Stack>
-    );
-  }
-
+function SlotsWrapper({ children }: SlotsWrapperProps) {
   return <React.Fragment>{children}</React.Fragment>;
 }
 
@@ -84,6 +68,7 @@ function PlaceholderWrapper(props: PlaceholderWrapperProps) {
       style={{
         minHeight: 72,
         minWidth: 200,
+        flex: 1,
       }}
     />
   );
@@ -226,10 +211,9 @@ export function Placeholder({ prop, children }: PlaceholderProps) {
 export interface SlotsProps {
   prop: string;
   children?: React.ReactNode;
-  hasLayout?: boolean;
 }
 
-export function Slots({ prop, children, hasLayout = false }: SlotsProps) {
+export function Slots({ prop, children }: SlotsProps) {
   const { nodeId } = React.useContext(NodeRuntimeContext);
   if (!nodeId) {
     return <React.Fragment>{children}</React.Fragment>;
@@ -240,7 +224,6 @@ export function Slots({ prop, children, hasLayout = false }: SlotsProps) {
       parentId={nodeId}
       {...{
         [RUNTIME_PROP_SLOTS]: prop,
-        slotType: hasLayout ? 'layout' : 'multiple',
       }}
     >
       {children}
@@ -279,7 +262,7 @@ export function createToolpadComponentThatThrows(error: Error) {
 const [useComponents, ComponentsContextProvider] =
   createProvidedContext<ToolpadComponents>('Components');
 
-export { useComponents, ComponentsContextProvider };
+export { ComponentsContextProvider, useComponents };
 
 export function useComponent(id: string) {
   const components = useComponents();

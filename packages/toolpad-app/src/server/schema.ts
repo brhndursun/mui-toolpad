@@ -52,9 +52,13 @@ const navigationActionSchema = z
   .object({
     $$navigationAction: z.object({
       page: z.string().describe('The page that is being navigated to'),
+      slug: z.string().describe('The page that is being navigated to with this slug'),
       parameters: z
         .record(bindableSchema(z.any()))
         .describe('Parameters to pass when navigating to this page'),
+      slugParameters: z
+        .record(bindableSchema(z.any()))
+        .describe('Parameters to replaced when navigating to this page'),
     }),
   })
   .describe(
@@ -261,6 +265,7 @@ export const pageSchema = toolpadObjectSchema(
   z.object({
     id: z.string().describe('Serves as a canonical id of the page.'),
     title: z.string().optional().describe('Title for this page.'),
+    slug: z.array(z.string()).optional().describe('URL slug for this page.'),
     parameters: z
       .array(nameStringValuePairSchema)
       .optional()
@@ -284,6 +289,13 @@ export const pageSchema = toolpadObjectSchema(
       .describe(
         'Display mode of the page. This can also be set at runtime with the toolpad-display query parameter',
       ),
+    layout: z
+      .union([
+        z.literal('container').describe('Use Container as root component of the page'),
+        z.literal('fluid').describe('Fluid page layout that allows you to use 100% of the page'),
+      ])
+      .optional()
+      .describe('Layout of the page.'),
   }),
 );
 

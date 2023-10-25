@@ -7,3 +7,9 @@ export function useNodeNameValidation(name: string, disallowedNames: Set<string>
     [name, disallowedNames, kind],
   );
 }
+export function useNodeSlugValidation(slugs: string[], disallowedNames: Set<string>, kind: string) {
+  return React.useMemo(
+    () => appDom.validateNodeSlug(slugs, disallowedNames, kind),
+    [slugs, disallowedNames, kind],
+  );
+}

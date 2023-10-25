@@ -19,8 +19,6 @@ import {
 import {
   isPageRow,
   isPageColumn,
-  PAGE_ROW_COMPONENT_ID,
-  PAGE_COLUMN_COMPONENT_ID,
   isFormComponent,
   FORM_COMPONENT_ID,
 } from '../../../../runtime/toolpadComponents';
@@ -947,7 +945,7 @@ export default function RenderOverlay({ bridge }: RenderOverlayProps) {
                 if (isOriginalParentRow) {
                   const columnContainer = appDom.createElement(
                     draft,
-                    PAGE_COLUMN_COMPONENT_ID,
+                    'Stack',
                     {},
                     {
                       columnSize: dragOverNode.layout?.columnSize || 1,
@@ -1022,7 +1020,7 @@ export default function RenderOverlay({ bridge }: RenderOverlayProps) {
                 const hasNewPageRow = isOriginalParentLayout || isOriginalParentColumn;
 
                 if (hasNewPageRow) {
-                  const rowContainer = appDom.createElement(draft, PAGE_ROW_COMPONENT_ID, {
+                  const rowContainer = appDom.createElement(draft, 'Stack', {
                     justifyContent: originalParentInfo?.props.alignItems || 'start',
                   });
                   draft = appDom.addNode(

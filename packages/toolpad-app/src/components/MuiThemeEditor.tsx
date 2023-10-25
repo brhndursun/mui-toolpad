@@ -4,30 +4,30 @@ import {
   Button,
   capitalize,
   createTheme,
-  PaletteMode,
+  // PaletteMode,
   Popover,
   SimplePaletteColorOptions,
   Stack,
-  styled,
+  // styled,
   ThemeOptions,
-  ToggleButton,
-  ToggleButtonGroup,
+  // ToggleButton,
+  // ToggleButtonGroup,
   useTheme,
 } from '@mui/material';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
+// import LightModeIcon from '@mui/icons-material/LightMode';
+// import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { WithControlledProp } from '../utils/types';
 import ColorTool from './ColorTool';
 import FlexFill from './FlexFill';
 
-const IconToggleButton = styled(ToggleButton)({
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%',
-  '& > *': {
-    marginRight: '8px',
-  },
-});
+// const IconToggleButton = styled(ToggleButton)({
+//   display: 'flex',
+//   justifyContent: 'center',
+//   width: '100%',
+//   '& > *': {
+//     marginRight: '8px',
+//   },
+// });
 
 interface PaletteColorPickerProps extends WithControlledProp<string | undefined> {
   label: string;
@@ -93,7 +93,9 @@ export default function MuiThemeEditor({ value, onChange }: MuiThemeEditorProps)
     [value?.palette?.mode],
   );
 
-  const colorPicker = (intent: 'primary' | 'secondary') => (
+  const colorPicker = (
+    intent: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error',
+  ) => (
     <PaletteColorPicker
       label={capitalize(intent)}
       value={
@@ -119,7 +121,8 @@ export default function MuiThemeEditor({ value, onChange }: MuiThemeEditorProps)
 
   return (
     <Stack direction="column" spacing={2}>
-      <ToggleButtonGroup
+      {/* TODO: 32bit Dark Light entegrasyonu düzenlenmeli */}
+      {/* <ToggleButtonGroup
         exclusive
         value={value?.palette?.mode || defaultTheme.palette.mode}
         onChange={(event, newMode: PaletteMode | null) => {
@@ -143,11 +146,19 @@ export default function MuiThemeEditor({ value, onChange }: MuiThemeEditorProps)
           <DarkModeIcon />
           Dark
         </IconToggleButton>
-      </ToggleButtonGroup>
+      </ToggleButtonGroup> */}
 
       {colorPicker('primary')}
 
       {colorPicker('secondary')}
+
+      {colorPicker('info')}
+
+      {colorPicker('success')}
+
+      {colorPicker('warning')}
+
+      {colorPicker('error')}
     </Stack>
   );
 }

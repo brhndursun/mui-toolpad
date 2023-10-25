@@ -18,6 +18,7 @@ const RETAINED_URL_PARAMS = new Set([TOOLPAD_DISPLAY_MODE_URL_PARAM]);
 
 export interface NavigationEntry {
   slug: string;
+  slugs: string[];
   displayName: string;
   hasShell?: boolean;
 }
@@ -64,7 +65,7 @@ function AppPagesNavigation({
           <ListItem key={page.slug} disablePadding>
             <ListItemButton
               component={Link}
-              to={`pages/${page.slug}${search}`}
+              to={`${page.slug}${search}`}
               selected={activePage === page.slug}
             >
               <ListItemText primary={page.displayName} sx={{ ml: 2 }} />
@@ -103,7 +104,10 @@ export function AppLayout({
     return urlParams.size > 0 ? `?${urlParams.toString()}` : '';
   }, [urlParams]);
 
-  const navEntry = pages.find((page) => page.slug === activePage);
+  // FIND PAGEEEE
+  const navEntry = pages.find(
+    (page) => page.slug === activePage || page.slugs.includes(activePage || ''),
+  );
 
   const displayMode = urlParams.get(TOOLPAD_DISPLAY_MODE_URL_PARAM);
 

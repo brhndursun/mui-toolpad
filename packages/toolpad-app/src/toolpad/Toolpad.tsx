@@ -1,21 +1,35 @@
-import { CircularProgress, Box, styled, CssBaseline, Button, Stack, Tooltip } from '@mui/material';
-import * as React from 'react';
-import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import SyncIcon from '@mui/icons-material/Sync';
 import SyncProblemIcon from '@mui/icons-material/SyncProblem';
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  CircularProgress,
+  CssBaseline,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Tooltip,
+  styled,
+} from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import AppEditor from './AppEditor';
-import ErrorAlert from './AppEditor/PageEditor/ErrorAlert';
+import * as React from 'react';
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { ThemeProvider } from '../ThemeContext';
-import { APP_FUNCTIONS_ROUTE } from '../routes';
-import ToolpadShell from './ToolpadShell';
-import { getViewFromPathname } from '../utils/domView';
-import AppProvider, { AppState, useAppStateContext } from './AppState';
 import { GLOBAL_FUNCTIONS_FEATURE_FLAG } from '../constants';
 import { ProjectProvider } from '../project';
+import { APP_FUNCTIONS_ROUTE } from '../routes';
+import { getViewFromPathname } from '../utils/domView';
+import useMenu from '../utils/useMenu';
+import AppEditor from './AppEditor';
+import ErrorAlert from './AppEditor/PageEditor/ErrorAlert';
+import AppProvider, { AppState, useAppStateContext } from './AppState';
+import ToolpadShell from './ToolpadShell';
 
 const Centered = styled('div')({
   height: '100%',
@@ -84,37 +98,55 @@ function EditorShell({ children }: EditorShellProps) {
 
   const location = useLocation();
 
+  const { buttonProps, menuProps, onMenuClose } = useMenu();
+
   const shellProps = React.useMemo(() => {
     const currentView = getViewFromPathname(location.pathname);
 
     if (currentView) {
       const currentPageId = currentView?.kind === 'page' ? currentView.nodeId : null;
 
-      const previewPath = currentPageId
-        ? `${appState.appUrl}/pages/${currentPageId}`
-        : appState.appUrl;
+      const previewPath = currentPageId ? `${appState.appUrl}/${currentPageId}` : appState.appUrl;
 
       return {
         actions: (
-          <Stack direction="row" gap={1} alignItems="center">
-            <Button
-              variant="outlined"
-              endIcon={<OpenInNewIcon />}
-              color="primary"
-              component="a"
-              href={previewPath}
-              target="_blank"
-            >
-              Preview
-            </Button>
-          </Stack>
+          <React.Fragment>
+            <Stack direction="row" gap={1} alignItems="center">
+              <ButtonGroup>
+                <Button
+                  variant="outlined"
+                  endIcon={<OpenInNewIcon />}
+                  color="primary"
+                  component="a"
+                  href={previewPath}
+                  target="_blank"
+                >
+                  Preview
+                </Button>
+                <Button size="small" {...buttonProps}>
+                  <ArrowDropDownIcon />
+                </Button>
+              </ButtonGroup>
+            </Stack>
+
+            <Menu {...menuProps}>
+              <MenuItem
+                onClick={(event) => {
+                  // onChange(event, option.value);
+                  onMenuClose();
+                }}
+              >
+                <ListItemText primary={'Yapım aşamasında'} />
+              </MenuItem>
+            </Menu>
+          </React.Fragment>
         ),
         status: getAppSaveState(appState),
       };
     }
 
     return {};
-  }, [appState, location.pathname]);
+  }, [appState, location.pathname, buttonProps, menuProps, onMenuClose]);
 
   return <ToolpadShell {...shellProps}>{children}</ToolpadShell>;
 }

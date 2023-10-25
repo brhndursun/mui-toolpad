@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   Dialog,
   DialogActions,
@@ -12,9 +13,10 @@ import useEventCallback from '@mui/utils/useEventCallback';
 import * as appDom from '../../../appDom';
 import DialogForm from '../../../components/DialogForm';
 import { useAppStateApi, useAppState } from '../../AppState';
-import { useNodeNameValidation } from './validation';
+import { useNodeNameValidation, useNodeSlugValidation } from './validation';
 
 const DEFAULT_NAME = 'page';
+const DEFAULT_SLUG = ['page'];
 
 export interface CreatePageDialogProps {
   open: boolean;
@@ -29,8 +31,13 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
     () => appDom.getExistingNamesForChildren(dom, appDom.getApp(dom), 'pages'),
     [dom],
   );
+  const existingSlugs = React.useMemo(
+    () => appDom.getExistingNamesForChildren(dom, appDom.getApp(dom), 'pages', 'slug'),
+    [dom],
+  );
 
   const [name, setName] = React.useState(appDom.proposeName(DEFAULT_NAME, existingNames));
+  const [slug, setSlug] = React.useState(DEFAULT_SLUG);
 
   // Reset form
   const handleReset = useEventCallback(() =>
@@ -44,8 +51,10 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
   }, [open, handleReset]);
 
   const inputErrorMsg = useNodeNameValidation(name, existingNames, 'page');
+  const inputSlugErrorMsg = useNodeSlugValidation(slug, existingSlugs, 'page');
   const isNameValid = !inputErrorMsg;
-  const isFormValid = isNameValid;
+  const isSlugValid = !inputSlugErrorMsg;
+  const isFormValid = isNameValid && isSlugValid;
 
   return (
     <Dialog open={open} onClose={onClose} {...props}>
@@ -59,7 +68,9 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
             name,
             attributes: {
               title: name,
-              display: 'shell',
+              display: 'standalone',
+              layout: 'fluid',
+              slug,
             },
           });
           const appNode = appDom.getApp(dom);
@@ -79,11 +90,31 @@ export default function CreatePageDialog({ open, onClose, ...props }: CreatePage
             required
             autoFocus
             fullWidth
-            label="name"
+            label="Page Name"
             value={name}
             onChange={(event) => setName(event.target.value)}
             error={!isNameValid}
             helperText={inputErrorMsg}
+          />
+          <Autocomplete
+            multiple
+            limitTags={2}
+            freeSolo
+            sx={{ my: 1 }}
+            fullWidth
+            value={slug}
+            onChange={(_, value) => {
+              setSlug(value);
+            }}
+            options={[]}
+            renderInput={(params) => (
+              <TextField
+                error={!isSlugValid}
+                helperText={inputSlugErrorMsg}
+                label="Page Slug"
+                {...params}
+              />
+            )}
           />
         </DialogContent>
         <DialogActions>

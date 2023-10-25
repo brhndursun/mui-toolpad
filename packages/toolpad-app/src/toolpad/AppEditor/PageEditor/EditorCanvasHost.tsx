@@ -124,7 +124,7 @@ export default function EditorCanvasHost({
     }
   });
 
-  const src = `${base}/pages/${pageNodeId}`;
+  const src = `${base}/${pageNodeId}`;
 
   const [loading, setLoading] = React.useState(true);
   useOnChange(src, () => setLoading(true));

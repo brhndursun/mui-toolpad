@@ -359,20 +359,32 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
 
   const getDefaultActionParameters = React.useCallback((page: appDom.PageNode) => {
     const defaultPageParameters = page.attributes.parameters || [];
-
     return Object.fromEntries(defaultPageParameters);
+  }, []);
+
+  const getDefaultPageSlugs = React.useCallback((page: appDom.PageNode) => {
+    const defaultPageSlugs = page.attributes.slug || [];
+    return defaultPageSlugs;
+  }, []);
+  const getDefaultPageSlugParameters = React.useCallback((page: appDom.PageNode) => {
+    const params = page.attributes.slug;
+    const extractParams = (input: string) => {
+      return input.match(/:([^/]+)(?=(\/|$))/g)?.map((match) => match.slice(1));
+    };
+    return [...new Set(params.map(extractParams).flat())].filter(Boolean);
   }, []);
 
   const handlePageChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const pageId = event.target.value as NodeId;
-      const page = appDom.getNode(dom, pageId);
+      const page = appDom.getNode(dom, pageId) as appDom.PageNode;
+      const pageSlugId = page.attributes.slug[0];
 
       const defaultActionParameters = appDom.isPage(page) ? getDefaultActionParameters(page) : {};
-
       onChange({
         $$navigationAction: {
           page: pageId,
+          pageSlug: pageSlugId,
           parameters: defaultActionParameters,
         },
       });
@@ -380,20 +392,47 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
     [dom, getDefaultActionParameters, onChange],
   );
 
+  const handlePageSlugChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const pageSlugId = event.target.value;
+      const pageId = pages.find((page) => page.attributes.slug.includes(pageSlugId))?.id as NodeId;
+      const page = appDom.getNode(dom, pageId);
+
+      const defaultActionParameters = appDom.isPage(page) ? getDefaultActionParameters(page) : {};
+      const defaultActionSlugs = appDom.isPage(page) ? getDefaultPageSlugParameters(page) : {};
+
+      onChange({
+        $$navigationAction: {
+          page: pageId,
+          pageSlug: pageSlugId,
+          slugParameters: defaultActionSlugs,
+          parameters: defaultActionParameters,
+        },
+      });
+    },
+    [dom, getDefaultActionParameters, getDefaultPageSlugParameters, onChange, pages],
+  );
   const actionPageId = value?.$$navigationAction?.page || null;
+  const actionPageSlug = value?.$$navigationAction?.pageSlug || null;
   const actionParameters = React.useMemo(
     () => value?.$$navigationAction.parameters || {},
     [value?.$$navigationAction.parameters],
+  );
+  const actionSlugs = React.useMemo(
+    () => value?.$$navigationAction.slugParameters || {},
+    [value?.$$navigationAction.slugParameters],
   );
 
   const actionPage = pages.find((availablePage) => availablePage.id === actionPageId);
 
   const handleActionParameterChange = React.useCallback(
     (actionParameterName: string) => (newValue: BindableAttrValue<string> | null) => {
-      if (actionPageId) {
+      if (actionPageId && actionPageSlug) {
         onChange({
           $$navigationAction: {
             page: actionPageId,
+            pageSlug: actionPageSlug,
+            slugParameters: actionSlugs,
             parameters: {
               ...actionParameters,
               ...(newValue ? { [actionParameterName]: newValue } : {}),
@@ -402,12 +441,51 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
         });
       }
     },
-    [actionPageId, actionParameters, onChange],
+    [actionPageId, actionPageSlug, actionSlugs, actionParameters, onChange],
+  );
+
+  const handleSlugParameterChange = React.useCallback(
+    (slugParameterName: string) => (newValue: BindableAttrValue<string> | null) => {
+      console.log(
+        actionPageId,
+        actionPageSlug,
+        slugParameterName,
+        newValue,
+        actionSlugs,
+        actionParameters,
+      );
+      if (actionPageId && actionPageSlug) {
+        onChange({
+          $$navigationAction: {
+            page: actionPageId,
+            pageSlug: actionPageSlug,
+            parameters: actionParameters,
+            slugParameters: {
+              ...actionSlugs,
+              ...(newValue ? { [slugParameterName]: newValue } : {}),
+            },
+          },
+        });
+      }
+    },
+    [actionPageId, actionPageSlug, actionParameters, actionSlugs, onChange],
   );
 
   const hasPagesAvailable = pages.length > 0;
 
   const defaultActionParameters = actionPage ? getDefaultActionParameters(actionPage) : {};
+  const defaultPageSlugs = actionPage ? getDefaultPageSlugs(actionPage) : [];
+  const defaultSlugParameters = React.useMemo(() => {
+    if (!actionPage) {
+      return [];
+    }
+    const params = getDefaultPageSlugs(actionPage);
+    const extractParams = (input: string) => {
+      return input.match(/:([^/]+)(?=(\/|$))/g)?.map((match) => match.slice(1));
+    };
+
+    return [...new Set(params.map(extractParams).flat())].filter(Boolean);
+  }, [actionPage, getDefaultPageSlugs]);
 
   const actionParameterEntries = Object.entries(actionParameters || defaultActionParameters);
 
@@ -416,7 +494,7 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
       <Typography>Navigate to a page on this event</Typography>
       <TextField
         fullWidth
-        sx={{ my: 3 }}
+        sx={{ mt: 3 }}
         label="Select a page"
         select
         value={actionPageId || ''}
@@ -430,6 +508,40 @@ function NavigationActionEditor({ value, onChange }: NavigationActionEditorProps
           </MenuItem>
         ))}
       </TextField>
+
+      <TextField
+        fullWidth
+        label="Select a slug"
+        select
+        value={actionPageSlug || ''}
+        onChange={handlePageSlugChange}
+        disabled={!hasPagesAvailable}
+        helperText={hasPagesAvailable ? null : 'No other pages available'}
+      >
+        {defaultPageSlugs.map((slug) => (
+          <MenuItem key={slug} value={slug}>
+            {slug}
+          </MenuItem>
+        ))}
+      </TextField>
+      {defaultSlugParameters.length > 0 ? (
+        <React.Fragment>
+          <Typography variant="overline">Page Slugs:</Typography>
+          {defaultSlugParameters.map((actionSlugName) => {
+            const actionSlugValue = actionSlugs[actionSlugName] || '';
+
+            return (
+              <NavigationActionParameterEditor
+                key={actionSlugName}
+                label={actionSlugName}
+                value={actionSlugValue as BindableAttrValue<string>}
+                onChange={handleSlugParameterChange(actionSlugName)}
+              />
+            );
+          })}
+        </React.Fragment>
+      ) : null}
+
       {actionParameterEntries.length > 0 ? (
         <React.Fragment>
           <Typography variant="overline">Page parameters:</Typography>

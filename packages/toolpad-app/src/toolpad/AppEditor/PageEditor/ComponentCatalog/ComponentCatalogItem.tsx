@@ -6,6 +6,7 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import Crop75Icon from '@mui/icons-material/Crop75';
 import ArrowDropDownCircleIcon from '@mui/icons-material/ArrowDropDownCircle';
 import LayersIcon from '@mui/icons-material/Layers';
+import LayersOutlineIcon from '@mui/icons-material/LayersOutlined';
 import DnsIcon from '@mui/icons-material/Dns';
 import ContactPageIcon from '@mui/icons-material/ContactPage';
 import TabIcon from '@mui/icons-material/Tab';
@@ -18,6 +19,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import DashboardCustomizeSharpIcon from '@mui/icons-material/DashboardCustomizeSharp';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
 import AddIcon from '@mui/icons-material/Add';
+import StarHalf from '@mui/icons-material/StarHalf';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import NotesIcon from '@mui/icons-material/Notes';
 import AutoAwesomeMosaicIcon from '@mui/icons-material/AutoAwesomeMosaic';
@@ -41,21 +43,24 @@ const iconMap = new Map<string, React.ComponentType<SvgIconProps>>([
   ['Link', LinkIcon],
   ['Markdown', TextFormatIcon],
   ['Button', SmartButtonIcon],
+  ['ButtonGroup', ViewColumnIcon],
   ['Image', ImageIcon],
   ['DataGrid', GridOnIcon],
   ['TextField', Crop75Icon],
   ['Select', ArrowDropDownCircleIcon],
   ['List', ListIcon],
   ['Paper', LayersIcon],
+  ['Stack', LayersOutlineIcon],
   ['Form', DnsIcon],
   ['Card', ContactPageIcon],
   ['Tabs', TabIcon],
   ['Slider', TuneIcon],
   ['Switch', ToggleOnIcon],
-  ['Radio', RadioButtonCheckedIcon],
   ['DatePicker', DateRangeIcon],
   ['FilePicker', UploadFileIcon],
   ['Checkbox', CheckBoxIcon],
+  ['Rating', StarHalf],
+  ['RadioGroup', RadioButtonCheckedIcon],
   ['CodeComponent', DashboardCustomizeSharpIcon],
   ['CreateNew', AddIcon],
   ['Tabs', TabIcon],

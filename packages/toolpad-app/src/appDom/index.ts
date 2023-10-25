@@ -81,14 +81,17 @@ export interface ConnectionNode<P = unknown> extends AppDomNodeBase {
 }
 
 export type PageDisplayMode = 'standalone' | 'shell';
+export type PageLayoutMode = 'container' | 'fluid';
 
 export interface PageNode extends AppDomNodeBase {
   readonly type: 'page';
   readonly attributes: {
+    readonly slug: string[];
     readonly title: string;
     readonly parameters?: [string, string][];
     readonly module?: string;
     readonly display?: PageDisplayMode;
+    readonly layout?: PageLayoutMode;
   };
 }
 
@@ -382,7 +385,6 @@ export function getChildNodes<N extends AppDomNode>(dom: AppDom, parent: N): Nod
     const allNodeChildren: AppDomNode[] = Object.values(dom.nodes).filter(
       (node: AppDomNode) => node.parentId === parent.id,
     );
-
     for (const child of allNodeChildren) {
       const prop = child.parentProp || 'children';
       let existing = result[prop];
@@ -453,6 +455,43 @@ function slugifyNodeName(nameCandidate: string, fallback: string): string {
     slug = fallback;
   }
   return slug;
+}
+
+export function validateNodeSlug(slugs: string[], disallowedNames: Set<string>, kind: string) {
+  const a = slugs.map((slug) => {
+    if (!slug) {
+      return 'a slug is required';
+    }
+
+    const firstLetter = slug[0];
+    if (!/[a-z_]/i.test(firstLetter)) {
+      return `${kind} may not start with a "${firstLetter}"`;
+    }
+
+    const match = /([^a-zA-Z0-9:_\-/])/i.exec(slug);
+
+    if (match) {
+      const invalidCharacter = match[1];
+      if (/\s/.test(invalidCharacter)) {
+        return `${kind} may not contain spaces`;
+      }
+      return `${kind} may not contain a "${invalidCharacter}"`;
+    }
+
+    // TODO: Check for duplicate ?
+    // const slug = slugifyNodeName(slug, kind);
+
+    // const isDuplicate = disallowedNames.has(slug);
+
+    // if (isDuplicate) {
+    //   return `There already is a ${kind} with this slug`;
+    // }
+
+    return null;
+  })[0];
+  console.log(a);
+
+  return a;
 }
 
 export function validateNodeName(name: string, disallowedNames: Set<string>, kind: string) {
@@ -633,9 +672,9 @@ export function getExistingNamesForChildren<Parent extends AppDomNode>(
   dom: AppDom,
   parent: Parent,
   parentProp?: ParentProp<Parent>,
+  scope?: string,
 ): Set<string> {
   const pageNode = getPageAncestor(dom, parent);
-
   if (pageNode) {
     const pageDescendants = getDescendants(dom, pageNode);
     return new Set(pageDescendants.map((scopeNode) => scopeNode.name));
@@ -644,6 +683,9 @@ export function getExistingNamesForChildren<Parent extends AppDomNode>(
   if (parentProp) {
     const childNodes = getChildNodes(dom, parent);
     const { [parentProp]: children = [] } = childNodes;
+    if (scope) {
+      return new Set(children.map((scopeNode) => scopeNode.attributes[scope as keyof {}]));
+    }
     return new Set(children.map((scopeNode) => scopeNode.name));
   }
 
@@ -1108,6 +1150,8 @@ export function createDefaultDom(): AppDom {
     attributes: {
       title: 'Page 1',
       display: 'shell',
+      layout: 'container',
+      slug: ['page'],
     },
   });
 

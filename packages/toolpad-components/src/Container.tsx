@@ -8,11 +8,16 @@ interface Props extends ContainerProps {
 }
 
 function Container({ children, visible, sx, ...props }: Props) {
-  return visible ? (
+  return (
     <MUIContainer disableGutters sx={sx} {...props}>
       {children}
     </MUIContainer>
-  ) : null;
+  );
+  // return visible ? (
+  //   <MUIContainer disableGutters sx={sx} {...props}>
+  //     {children}
+  //   </MUIContainer>
+  // ) : null;
 }
 
 export default createBuiltin(Container, {
