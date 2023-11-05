@@ -1095,7 +1095,7 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
             const parsedParameters = Object.fromEntries(parsedParameterEntries);
             const parsedSlugs = Object.fromEntries(parsedSlugEntries);
 
-            if (isRenderedInCanvas) {
+            if (IS_RENDERED_IN_CANVAS) {
               navigateToPage(page, parsedParameters);
             } else {
               const pattern = /:([a-zA-Z]+)/g;
@@ -1260,11 +1260,11 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
     };
   }, [nodeId, argTypes, vmRef, scope]);
 
-  if (isTextComponent && !isRenderedInCanvas) {
+  if (isTextComponent && !IS_RENDERED_IN_CANVAS) {
     return <RenderedPage nodeId={elemNode?.props?.value.replace('page#', '')} />;
   }
 
-  if (isRenderedInCanvas) {
+  if (IS_RENDERED_IN_CANVAS) {
     return (
       <NodeRuntimeWrapper
         nodeId={nodeId}
@@ -1333,7 +1333,7 @@ function PageRoot({ children, attributes }: PageRootProps) {
       sx={{
         flex: 1,
         gap: 1,
-        ...(isRenderedInCanvas ? { px: 3 } : {}),
+        ...(IS_RENDERED_IN_CANVAS ? { px: 3 } : {}),
       }}
     >
       {children}
