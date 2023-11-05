@@ -142,6 +142,15 @@ export const INTERNAL_COMPONENTS = new Map<string, ToolpadComponentDefinition>([
     },
   ],
   [
+    'PageRenderer',
+    {
+      displayName: 'Page Renderer',
+      builtIn: 'PageRenderer',
+      synonyms: [],
+      group: 'display',
+    },
+  ],
+  [
     'Select',
     {
       displayName: 'Select',

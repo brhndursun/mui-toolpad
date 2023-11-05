@@ -22,3 +22,10 @@ spec:
               action:
                 $$jsExpression: |
                   'asd'
+    - component: PageRenderer
+      name: pageRenderer
+      props:
+        value: page#E4tRpZL
+    - component: Text
+      name: text
+    # - page: VL1vLQx

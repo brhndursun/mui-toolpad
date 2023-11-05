@@ -960,6 +960,7 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
   const nodeId = node.id;
 
   const componentConfig = Component[TOOLPAD_COMPONENT];
+  // console.log(node, childNodeGroups, componentConfig);
   const {
     argTypes = {},
     errorProp,
@@ -970,6 +971,11 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
 
   const isLayoutNode =
     appDom.isPage(node) || (appDom.isElement(node) && isPageLayoutComponent(node));
+
+  const elemNode = node as appDom.ElementNode;
+  const isTextComponent =
+    elemNode.attributes.component === 'PageRenderer' && elemNode?.props?.value.startsWith('page#');
+  console.log(isTextComponent, elemNode);
 
   const scope = useAssertedContext(RuntimeScopeContext);
   const liveBindings = scope.bindings;
@@ -1254,6 +1260,10 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
     };
   }, [nodeId, argTypes, vmRef, scope]);
 
+  if (isTextComponent && !isRenderedInCanvas) {
+    return <RenderedPage nodeId={elemNode?.props?.value.replace('page#', '')} />;
+  }
+
   if (isRenderedInCanvas) {
     return (
       <NodeRuntimeWrapper
@@ -1267,12 +1277,16 @@ function RenderedNodeContent({ node, childNodeGroups, Component }: RenderedNodeC
             <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
           </StyledInvisibleContent>
         ) : (
-          <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+          <React.Fragment>
+            <Component {...wrappedProps} {...(isLayoutNode && { attributes: node.attributes })} />
+            {isTextComponent && (
+              <RenderedPage nodeId={elemNode?.props?.value.replace('page#', '')} />
+            )}
+          </React.Fragment>
         )}
       </NodeRuntimeWrapper>
     );
   }
-
   return (
     <NodeRuntimeWrapper
       nodeId={nodeId}

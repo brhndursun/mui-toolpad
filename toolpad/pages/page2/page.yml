@@ -11,6 +11,12 @@ spec:
       name: text
       props:
         value: PAGE2
+    - component: Button
+      name: button
+      props:
+        content: Button Textasdasd
+    - component: Text
+      name: text1
   parameters:
     - name: d
       value: a

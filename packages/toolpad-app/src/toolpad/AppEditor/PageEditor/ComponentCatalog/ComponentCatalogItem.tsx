@@ -31,6 +31,7 @@ import MoodIcon from '@mui/icons-material/Mood';
 import HtmlIcon from '@mui/icons-material/Html';
 import TableRowsIcon from '@mui/icons-material/TableRows';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
+import WebIcon from '@mui/icons-material/Web';
 import TagIcon from '@mui/icons-material/Tag';
 import PasswordIcon from '@mui/icons-material/Password';
 import LinkIcon from '@mui/icons-material/Link';
@@ -72,6 +73,7 @@ const iconMap = new Map<string, React.ComponentType<SvgIconProps>>([
   ['Html', HtmlIcon],
   ['PageRow', TableRowsIcon],
   ['PageColumn', ViewColumnIcon],
+  ['PageRenderer', WebIcon],
   ['Metric', TagIcon],
 ]);
 

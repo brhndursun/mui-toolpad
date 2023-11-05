@@ -24,6 +24,8 @@ export { default as List } from './List';
 
 export { default as Paper } from './Paper';
 
+export { default as PageRenderer } from './PageRenderer';
+
 export { default as Image } from './Image';
 
 export { default as DatePicker } from './DatePicker';
