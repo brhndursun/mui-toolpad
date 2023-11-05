@@ -525,3 +525,5 @@ export interface ToolpadDataProviderBase<R, P extends PaginationMode = 'index'> 
   // deleteRecord?: (id: string) => Promise<void>;
   // createRecord?: (record: R) => Promise<void>;
 }
+
+export type NodeHashes = Record<NodeId, number | undefined>;
